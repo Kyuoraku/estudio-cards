@@ -21,6 +21,7 @@ export const AppProvider = ({ children }) => {
         const loadData = () => {
             const loadedSubjects = getSubjects();
             const loadedCards = getCards();
+            console.log('Cargando datos:', { loadedSubjects, loadedCards });
             setSubjects(loadedSubjects);
             setCards(loadedCards);
             setLoading(false);
@@ -47,22 +48,31 @@ export const AppProvider = ({ children }) => {
     };
 
     const handleAddCard = (card) => {
+        console.log('Agregando tarjeta:', card);
         const newCard = addCard(card);
-        setCards([...cards, newCard]);
+        console.log('Tarjeta agregada:', newCard);
+        setCards(prevCards => [...prevCards, newCard]);
     };
 
     const handleUpdateCard = (id, updates) => {
+        console.log('Actualizando tarjeta:', { id, updates });
         const updatedCard = updateCard(id, updates);
+        console.log('Tarjeta actualizada:', updatedCard);
         setCards(cards.map(c => c.id === id ? updatedCard : c));
     };
 
     const handleDeleteCard = (id) => {
+        console.log('Eliminando tarjeta:', id);
         deleteCard(id);
         setCards(cards.filter(c => c.id !== id));
     };
 
     const getSubjectCards = (subjectId) => {
-        return cards.filter(card => card.subject_id === subjectId);
+        console.log('Buscando tarjetas para la materia:', subjectId);
+        console.log('Todas las tarjetas:', cards);
+        const filteredCards = cards.filter(card => card.subject_id === subjectId);
+        console.log('Tarjetas filtradas:', filteredCards);
+        return filteredCards;
     };
 
     if (loading) {

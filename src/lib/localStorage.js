@@ -3,10 +3,22 @@
 const SUBJECTS_KEY = 'estudio-cards-subjects';
 const CARDS_KEY = 'estudio-cards-cards';
 
+// Helper para traducir tipos de respuesta
+export const getCardTypeLabel = (type) => {
+    const types = {
+        'single': 'Respuesta única',
+        'multiple': 'Respuesta múltiple',
+        'fill': 'Completar palabras'
+    };
+    return types[type] || type;
+};
+
 // Funciones para manejar materias
 export const getSubjects = () => {
-    const subjects = localStorage.getItem('estudio-cards-subjects');
-    return subjects ? JSON.parse(subjects) : [];
+    const subjects = localStorage.getItem(SUBJECTS_KEY);
+    const parsedSubjects = subjects ? JSON.parse(subjects) : [];
+    console.log('Materias cargadas:', parsedSubjects);
+    return parsedSubjects;
 };
 
 export const addSubject = (subject) => {
@@ -17,7 +29,8 @@ export const addSubject = (subject) => {
         created_at: new Date().toISOString()
     };
     subjects.push(newSubject);
-    localStorage.setItem('estudio-cards-subjects', JSON.stringify(subjects));
+    localStorage.setItem(SUBJECTS_KEY, JSON.stringify(subjects));
+    console.log('Materia agregada:', newSubject);
     return newSubject;
 };
 
@@ -26,7 +39,8 @@ export const updateSubject = (id, updates) => {
     const index = subjects.findIndex(s => s.id === id);
     if (index !== -1) {
         subjects[index] = { ...subjects[index], ...updates };
-        localStorage.setItem('estudio-cards-subjects', JSON.stringify(subjects));
+        localStorage.setItem(SUBJECTS_KEY, JSON.stringify(subjects));
+        console.log('Materia actualizada:', subjects[index]);
         return subjects[index];
     }
     return null;
@@ -35,19 +49,22 @@ export const updateSubject = (id, updates) => {
 export const deleteSubject = (id) => {
     const subjects = getSubjects();
     const filteredSubjects = subjects.filter(s => s.id !== id);
-    localStorage.setItem('estudio-cards-subjects', JSON.stringify(filteredSubjects));
+    localStorage.setItem(SUBJECTS_KEY, JSON.stringify(filteredSubjects));
+    console.log('Materia eliminada:', id);
 
     // También eliminamos las tarjetas asociadas
     const cards = getCards();
     const filteredCards = cards.filter(c => c.subject_id !== id);
     localStorage.setItem(CARDS_KEY, JSON.stringify(filteredCards));
+    console.log('Tarjetas eliminadas para la materia:', id);
 };
 
 // Funciones para manejar tarjetas
-export const getCards = (subjectId = null) => {
-    const cards = localStorage.getItem('estudio-cards-cards');
+export const getCards = () => {
+    const cards = localStorage.getItem(CARDS_KEY);
     const parsedCards = cards ? JSON.parse(cards) : [];
-    return subjectId ? parsedCards.filter(c => c.subject_id === subjectId) : parsedCards;
+    console.log('Tarjetas cargadas:', parsedCards);
+    return parsedCards;
 };
 
 export const addCard = (card) => {
@@ -58,13 +75,14 @@ export const addCard = (card) => {
         question: card.question,
         type: card.type || 'single',
         options: card.options || [],
-        answer: card.answer,
+        answer: card.answer || '',
         hint: card.hint || '',
         solution: card.solution || '',
         created_at: new Date().toISOString()
     };
     cards.push(newCard);
-    localStorage.setItem('estudio-cards-cards', JSON.stringify(cards));
+    localStorage.setItem(CARDS_KEY, JSON.stringify(cards));
+    console.log('Tarjeta agregada:', newCard);
     return newCard;
 };
 
@@ -73,7 +91,8 @@ export const updateCard = (id, updates) => {
     const index = cards.findIndex(c => c.id === id);
     if (index !== -1) {
         cards[index] = { ...cards[index], ...updates };
-        localStorage.setItem('estudio-cards-cards', JSON.stringify(cards));
+        localStorage.setItem(CARDS_KEY, JSON.stringify(cards));
+        console.log('Tarjeta actualizada:', cards[index]);
         return cards[index];
     }
     return null;
@@ -82,5 +101,6 @@ export const updateCard = (id, updates) => {
 export const deleteCard = (id) => {
     const cards = getCards();
     const filteredCards = cards.filter(c => c.id !== id);
-    localStorage.setItem('estudio-cards-cards', JSON.stringify(filteredCards));
+    localStorage.setItem(CARDS_KEY, JSON.stringify(filteredCards));
+    console.log('Tarjeta eliminada:', id);
 }; 
