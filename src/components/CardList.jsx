@@ -1,6 +1,6 @@
 // src/components/CardList.jsx
 import React from 'react'
-import { Box, Typography, Button, Stack, TextField, Select, MenuItem, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material'
+import { Box, Typography, Button, Stack, TextField, Select, MenuItem, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Radio, RadioGroup, FormControlLabel, FormLabel } from '@mui/material'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { getCardTypeLabel } from '../lib/localStorage'
@@ -20,7 +20,9 @@ const CardList = () => {
     type: 'single',
     hint: '',
     solution: '',
-    subject_id: id
+    subject_id: id,
+    options: [],
+    correctOption: ''
   })
   const cards = getSubjectCards(id)
 
@@ -50,7 +52,9 @@ const CardList = () => {
         type: 'single',
         hint: '',
         solution: '',
-        subject_id: id
+        subject_id: id,
+        options: [],
+        correctOption: ''
       })
     }
   }
@@ -62,7 +66,9 @@ const CardList = () => {
       type: card.type,
       hint: card.hint || '',
       solution: card.solution || '',
-      subject_id: id
+      subject_id: id,
+      options: card.options || [],
+      correctOption: card.correctOption || ''
     })
     setShowAddCardModal(true)
   }
@@ -71,6 +77,35 @@ const CardList = () => {
     if (window.confirm('¿Estás seguro que deseas eliminar esta tarjeta?')) {
       deleteCard(cardId)
     }
+  }
+
+  const handleAddOption = () => {
+    setNewCard(prev => ({
+      ...prev,
+      options: [...prev.options, '']
+    }))
+  }
+
+  const handleOptionChange = (index, value) => {
+    setNewCard(prev => ({
+      ...prev,
+      options: prev.options.map((opt, i) => i === index ? value : opt)
+    }))
+  }
+
+  const handleDeleteOption = (index) => {
+    setNewCard(prev => ({
+      ...prev,
+      options: prev.options.filter((_, i) => i !== index),
+      correctOption: prev.correctOption === index ? '' : prev.correctOption
+    }))
+  }
+
+  const handleCorrectOptionChange = (index) => {
+    setNewCard(prev => ({
+      ...prev,
+      correctOption: index
+    }))
   }
 
   if (cards.length === 0) {
@@ -96,7 +131,9 @@ const CardList = () => {
               type: 'single',
               hint: '',
               solution: '',
-              subject_id: id
+              subject_id: id,
+              options: [],
+              correctOption: ''
             })
           }}
           title={editingCard ? "Editar tarjeta" : "Agregar nueva tarjeta"}
@@ -120,6 +157,41 @@ const CardList = () => {
                 <MenuItem value="fill">Completar palabras</MenuItem>
               </Select>
             </FormControl>
+            {newCard.type === 'single' && (
+              <Box sx={{ mt: 2 }}>
+                <FormLabel component="legend">Opciones de respuesta</FormLabel>
+                <RadioGroup
+                  value={newCard.correctOption}
+                  onChange={(e) => handleCorrectOptionChange(parseInt(e.target.value))}
+                >
+                  {newCard.options.map((option, index) => (
+                    <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <Radio value={index} />
+                      <TextField
+                        fullWidth
+                        value={option}
+                        onChange={(e) => handleOptionChange(index, e.target.value)}
+                        placeholder={`Opción ${index + 1}`}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteOption(index)}
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  ))}
+                </RadioGroup>
+                <Button
+                  variant="outlined"
+                  onClick={handleAddOption}
+                  sx={{ mt: 1 }}
+                >
+                  Agregar opción
+                </Button>
+              </Box>
+            )}
             <TextField
               label="Pista (opcional)"
               fullWidth
@@ -143,7 +215,9 @@ const CardList = () => {
                   type: 'single',
                   hint: '',
                   solution: '',
-                  subject_id: id
+                  subject_id: id,
+                  options: [],
+                  correctOption: ''
                 })
               }}>
                 Cancelar
@@ -244,7 +318,9 @@ const CardList = () => {
             type: 'single',
             hint: '',
             solution: '',
-            subject_id: id
+            subject_id: id,
+            options: [],
+            correctOption: ''
           })
         }}
         title={editingCard ? "Editar tarjeta" : "Agregar nueva tarjeta"}
@@ -268,6 +344,41 @@ const CardList = () => {
               <MenuItem value="fill">Completar palabras</MenuItem>
             </Select>
           </FormControl>
+          {newCard.type === 'single' && (
+            <Box sx={{ mt: 2 }}>
+              <FormLabel component="legend">Opciones de respuesta</FormLabel>
+              <RadioGroup
+                value={newCard.correctOption}
+                onChange={(e) => handleCorrectOptionChange(parseInt(e.target.value))}
+              >
+                {newCard.options.map((option, index) => (
+                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Radio value={index} />
+                    <TextField
+                      fullWidth
+                      value={option}
+                      onChange={(e) => handleOptionChange(index, e.target.value)}
+                      placeholder={`Opción ${index + 1}`}
+                    />
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDeleteOption(index)}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                ))}
+              </RadioGroup>
+              <Button
+                variant="outlined"
+                onClick={handleAddOption}
+                sx={{ mt: 1 }}
+              >
+                Agregar opción
+              </Button>
+            </Box>
+          )}
           <TextField
             label="Pista (opcional)"
             fullWidth
@@ -291,7 +402,9 @@ const CardList = () => {
                 type: 'single',
                 hint: '',
                 solution: '',
-                subject_id: id
+                subject_id: id,
+                options: [],
+                correctOption: ''
               })
             }}>
               Cancelar
