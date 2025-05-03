@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Typography, Box } from '@mui/material';
-import { useApp } from '../context/AppContext';
 import SubjectCard from './SubjectCard';
+import { useApp } from '../hooks/useApp';
 
 const SubjectGrid = () => {
     const { subjects } = useApp();

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { TextField, Button, Box, Stack } from '@mui/material';
-import { useApp } from '../context/AppContext';
+import PropTypes from 'prop-types';
+import { useApp } from '../hooks/useApp';
+import { Box, TextField, Button, Stack, Typography } from '@mui/material';
 
 const AddSubjectForm = ({ onClose }) => {
     const [name, setName] = useState('');

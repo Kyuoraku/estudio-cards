@@ -1,13 +1,14 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { AppBar, Toolbar, Typography, Button, Stack, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../hooks/useApp';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
-const Header = ({ onManageSubjects, subjectId }) => {
+const Header = ({ onManageSubjects, subjectId, onStartQuiz }) => {
     const navigate = useNavigate();
     const { subjects, deleteSubject } = useApp();
     const selectedSubjectName = subjects.find(s => s.id === subjectId)?.name;
@@ -58,8 +59,7 @@ const Header = ({ onManageSubjects, subjectId }) => {
     };
 
     const handleStartQuiz = () => {
-        // TODO: Implementar la lógica del quiz
-        console.log('Iniciando quiz para la materia:', selectedSubjectName);
+        onStartQuiz(subjectId);
     };
 
     return (
@@ -126,13 +126,7 @@ const Header = ({ onManageSubjects, subjectId }) => {
                                     startIcon={<FileUploadIcon />}
                                     component="label"
                                 >
-                                    Importar
-                                    <input
-                                        type="file"
-                                        hidden
-                                        accept=".json"
-                                        onChange={handleImport}
-                                    />
+                                    Importar <input type="file" hidden accept=".json" onChange={handleImport} />
                                 </Button>
                                 <Button
                                     variant="outlined"
@@ -164,6 +158,12 @@ const Header = ({ onManageSubjects, subjectId }) => {
             </Dialog>
         </>
     );
+};
+
+Header.propTypes = {
+    onManageSubjects: PropTypes.func.isRequired,
+    subjectId: PropTypes.string,
+    onStartQuiz: PropTypes.func.isRequired
 };
 
 export default Header; 

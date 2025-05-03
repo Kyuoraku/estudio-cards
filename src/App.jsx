@@ -1,6 +1,6 @@
 // src/App.jsx
-import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import React from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Box, Container } from '@mui/material'
 import Header from './components/Header'
 import SubjectGrid from './components/SubjectGrid'
@@ -12,12 +12,16 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import { AppProvider } from './context/AppContext'
+import QuizModal from './components/QuizModal'
 
 const AppContent = () => {
-  const [showAddSubjectModal, setShowAddSubjectModal] = useState(false)
+  const [showAddSubjectModal, setShowAddSubjectModal] = React.useState(false)
   const location = useLocation()
+  const [showSubjectDialog, setShowSubjectDialog] = React.useState(false)
+  const [showQuizModal, setShowQuizModal] = React.useState(false)
+  const [selectedSubjectId, setSelectedSubjectId] = React.useState(null)
 
-  // Obtener el ID de la materia de la ruta actual
   const getSubjectId = () => {
     if (location.pathname.startsWith('/subject/')) {
       return location.pathname.split('/')[2]
@@ -28,8 +32,9 @@ const AppContent = () => {
     return null
   }
 
-  const handleManageSubjects = () => {
-    setShowAddSubjectModal(true)
+  const handleStartQuiz = (subjectId) => {
+    setSelectedSubjectId(subjectId)
+    setShowQuizModal(true)
   }
 
   return (
@@ -44,11 +49,15 @@ const AppContent = () => {
       }}
     >
       <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-        <Header onManageSubjects={handleManageSubjects} subjectId={getSubjectId()} />
+        <Header
+          onManageSubjects={() => setShowSubjectDialog(true)}
+          onStartQuiz={handleStartQuiz}
+          subjectId={getSubjectId()}
+        />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Routes>
-            <Route path="/" element={<SubjectGrid />} />
-            <Route path="/subject/:id" element={<CardList />} />
+            <Route path="/" element={<SubjectGrid showSubjectDialog={showSubjectDialog} setShowSubjectDialog={setShowSubjectDialog} />} />
+            <Route path="/subject/:id" element={<CardList showSubjectDialog={showSubjectDialog} setShowSubjectDialog={setShowSubjectDialog} />} />
             <Route path="/quiz/:id" element={<Quiz />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
@@ -61,14 +70,23 @@ const AppContent = () => {
       >
         <AddSubjectForm onClose={() => setShowAddSubjectModal(false)} />
       </Modal>
+      <QuizModal
+        open={showQuizModal}
+        onClose={() => setShowQuizModal(false)}
+        subjectId={selectedSubjectId}
+      />
     </Container>
   )
 }
 
-export default function App() {
+const App = () => {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <BrowserRouter>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </BrowserRouter>
   )
 }
+
+export default App

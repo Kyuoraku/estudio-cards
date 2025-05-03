@@ -1,14 +1,16 @@
 // src/components/CardList.jsx
 import React, { useState } from 'react'
-import { Box, Typography, Button, Stack, TextField, Select, MenuItem, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Radio, RadioGroup, FormControlLabel, FormLabel, Alert } from '@mui/material'
+import PropTypes from 'prop-types'
+import { Box, Typography, Button, Stack, TextField, Select, MenuItem, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Radio, RadioGroup, FormControlLabel, FormLabel, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
+import { useApp } from '../hooks/useApp'
 import { getCardTypeLabel } from '../lib/localStorage'
 import Modal from './Modal'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import CheckIcon from '@mui/icons-material/Check'
+import QuizModal from './QuizModal'
 
 const CardList = () => {
   const { id } = useParams()
@@ -17,6 +19,7 @@ const CardList = () => {
   const [showAddCardModal, setShowAddCardModal] = React.useState(false)
   const [editingCard, setEditingCard] = React.useState(null)
   const cards = getSubjectCards(id)
+  const [showQuizModal, setShowQuizModal] = useState(false)
 
   console.log('Materia ID:', id)
   console.log('Tarjetas encontradas:', cards)
@@ -272,92 +275,104 @@ const CardList = () => {
   }
 
   return (
-    <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-        <Button
-          variant="outlined"
-          onClick={() => navigate('/')}
-        >
-          ← Volver
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setShowAddCardModal(true)}
-        >
-          Nueva tarjeta
-        </Button>
-      </Stack>
+    <>
+      <Box sx={{ p: 3 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/')}
+          >
+            ← Volver
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setShowAddCardModal(true)}
+          >
+            Nueva tarjeta
+          </Button>
+        </Stack>
 
-      <TableContainer component={Paper} sx={{ mb: 3 }}>
-        <Table sx={{ minWidth: 650 }} aria-label="tabla de tarjetas">
-          <TableHead>
-            <TableRow>
-              <TableCell>Pregunta</TableCell>
-              <TableCell>Tipo</TableCell>
-              <TableCell>Opciones</TableCell>
-              <TableCell align="right">Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {cards.map((card) => (
-              <TableRow
-                key={card.id}
-                sx={{
-                  '&:last-child td, &:last-child th': { border: 0 },
-                  cursor: 'pointer',
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
-                  }
-                }}
-                onClick={() => handleEditCard(card)}
-              >
-                <TableCell component="th" scope="row">
-                  {card.question}
-                </TableCell>
-                <TableCell>{getCardTypeLabel(card.type)}</TableCell>
-                <TableCell>{card.options.length}</TableCell>
-                <TableCell align="right">
-                  <IconButton
-                    aria-label="edit"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleEditCard(card)
-                    }}
-                    sx={{ mr: 1 }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    aria-label="delete"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleDeleteCard(card.id)
-                    }}
-                    color="error"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
+        <TableContainer component={Paper} sx={{ mb: 3 }}>
+          <Table sx={{ minWidth: 650 }} aria-label="tabla de tarjetas">
+            <TableHead>
+              <TableRow>
+                <TableCell>Pregunta</TableCell>
+                <TableCell>Tipo</TableCell>
+                <TableCell>Opciones</TableCell>
+                <TableCell align="right">Acciones</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {cards.map((card) => (
+                <TableRow
+                  key={card.id}
+                  sx={{
+                    '&:last-child td, &:last-child th': { border: 0 },
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                    }
+                  }}
+                  onClick={() => handleEditCard(card)}
+                >
+                  <TableCell component="th" scope="row">
+                    {card.question}
+                  </TableCell>
+                  <TableCell>{getCardTypeLabel(card.type)}</TableCell>
+                  <TableCell>{card.options.length}</TableCell>
+                  <TableCell align="right">
+                    <IconButton
+                      aria-label="edit"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleEditCard(card)
+                      }}
+                      sx={{ mr: 1 }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      aria-label="delete"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteCard(card.id)
+                      }}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-      <Modal
-        isOpen={showAddCardModal}
-        onClose={handleCloseModal}
-        title={editingCard ? "Editar tarjeta" : "Agregar nueva tarjeta"}
-      >
-        <AddCardForm
+        <Modal
+          isOpen={showAddCardModal}
           onClose={handleCloseModal}
-          subjectId={id}
-          editingCard={editingCard}
-        />
-      </Modal>
-    </Box>
+          title={editingCard ? "Editar tarjeta" : "Agregar nueva tarjeta"}
+        >
+          <AddCardForm
+            onClose={handleCloseModal}
+            subjectId={id}
+            editingCard={editingCard}
+          />
+        </Modal>
+      </Box>
+      <QuizModal open={showQuizModal} onClose={() => setShowQuizModal(false)} />
+    </>
   )
+}
+
+CardList.propTypes = {
+  id: PropTypes.string.isRequired,
+  navigate: PropTypes.func.isRequired,
+  getSubjectCards: PropTypes.func.isRequired,
+  deleteCard: PropTypes.func.isRequired,
+  addCard: PropTypes.func.isRequired,
+  updateCard: PropTypes.func.isRequired
 }
 
 export default CardList

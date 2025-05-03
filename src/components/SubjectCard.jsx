@@ -1,9 +1,10 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Card, CardContent, Typography, Button, Box, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../hooks/useApp';
 
 const SubjectCard = ({ subject }) => {
     const navigate = useNavigate();
@@ -98,6 +99,10 @@ const SubjectCard = ({ subject }) => {
             </Dialog>
         </>
     );
+};
+
+SubjectCard.propTypes = {
+    subject: PropTypes.object.isRequired,
 };
 
 export default SubjectCard; 

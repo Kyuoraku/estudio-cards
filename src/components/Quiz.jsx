@@ -1,8 +1,9 @@
 // src/components/Quiz.jsx
-import React, { useState } from 'react'
-import { Box, Typography, Button, Stack } from '@mui/material'
+import React, { useState, useEffect } from 'react'
+import PropTypes from 'prop-types'
+import { Box, Typography, Button, Stack, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel, Checkbox, FormGroup } from '@mui/material'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
+import { useApp } from '../hooks/useApp'
 
 const Quiz = () => {
   const { id } = useParams()
@@ -97,6 +98,12 @@ const Quiz = () => {
       )}
     </Box>
   )
+}
+
+Quiz.propTypes = {
+  id: PropTypes.string.isRequired,
+  navigate: PropTypes.func.isRequired,
+  getSubjectCards: PropTypes.func.isRequired,
 }
 
 export default Quiz

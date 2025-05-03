@@ -1,7 +1,8 @@
 // src/components/CardForm.jsx
-import { useState } from 'react'
-import { TextField, Button, Box, Stack } from '@mui/material'
-import { useApp } from '../context/AppContext'
+import React, { useState } from 'react'
+import PropTypes from 'prop-types'
+import { useApp } from '../hooks/useApp'
+import { TextField, Button, Box, Stack, Typography, FormControl, InputLabel, Select, MenuItem, IconButton, Radio, RadioGroup, FormControlLabel, FormLabel, Checkbox, FormGroup } from '@mui/material'
 
 export default function CardForm({ subjectId, card, onDone }) {
   const isNew = !card.id
@@ -79,4 +80,10 @@ export default function CardForm({ subjectId, card, onDone }) {
       </Stack>
     </Box>
   )
+}
+
+CardForm.propTypes = {
+  subjectId: PropTypes.string.isRequired,
+  card: PropTypes.object.isRequired,
+  onDone: PropTypes.func.isRequired
 }
