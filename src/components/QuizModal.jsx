@@ -5,6 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 const QuizModal = ({ open, onClose, subjectId }) => {
     const [currentCard, setCurrentCard] = useState(null);
     const [selectedOption, setSelectedOption] = useState(null);
+    const [showResult, setShowResult] = useState(false);
 
     useEffect(() => {
         const allCards = JSON.parse(localStorage.getItem('estudio-cards-cards') || '[]');
@@ -19,8 +20,14 @@ const QuizModal = ({ open, onClose, subjectId }) => {
     };
 
     const handleSubmit = () => {
-        // TODO: Implementar la lógica de verificación de respuesta
-        console.log('Respuesta seleccionada:', selectedOption);
+        setShowResult(true);
+    };
+
+    const getOptionColor = (option) => {
+        if (!showResult) return 'primary';
+        if (option.isCorrect) return 'success';
+        if (selectedOption === option) return 'error';
+        return 'primary';
     };
 
     if (!currentCard) {
@@ -84,14 +91,34 @@ const QuizModal = ({ open, onClose, subjectId }) => {
                         <Button
                             key={index}
                             variant={selectedOption === option ? "contained" : "outlined"}
-                            onClick={() => handleOptionSelect(option)}
+                            onClick={() => !showResult && handleOptionSelect(option)}
+                            disabled={showResult}
                             sx={{
                                 justifyContent: 'flex-start',
                                 padding: 2,
-                                textTransform: 'none'
+                                textTransform: 'none',
+                                color: getOptionColor(option),
+                                borderColor: getOptionColor(option),
+                                '&:hover': {
+                                    borderColor: getOptionColor(option)
+                                }
                             }}
                         >
-                            {option.title}
+                            <Box sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                width: '100%',
+                                alignItems: 'center'
+                            }}>
+                                <Typography>
+                                    {option.title}
+                                </Typography>
+                                {showResult && (
+                                    <Typography color={option.isCorrect ? 'success.main' : 'error.main'}>
+                                        {option.isCorrect ? 'Verdadero' : 'Falso'}
+                                    </Typography>
+                                )}
+                            </Box>
                         </Button>
                     ))}
                 </Stack>
@@ -99,9 +126,9 @@ const QuizModal = ({ open, onClose, subjectId }) => {
 
             <Button
                 variant="contained"
-                color="primary"
                 onClick={handleSubmit}
-                disabled={!selectedOption}
+                disabled={!selectedOption || showResult}
+                color={showResult ? (selectedOption?.isCorrect ? 'success' : 'error') : 'primary'}
                 sx={{
                     position: 'absolute',
                     bottom: 24,
@@ -109,7 +136,7 @@ const QuizModal = ({ open, onClose, subjectId }) => {
                     padding: '8px 24px'
                 }}
             >
-                Enviar
+                {showResult ? 'Siguiente' : 'Enviar'}
             </Button>
         </Dialog>
     );
