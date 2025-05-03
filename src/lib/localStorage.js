@@ -16,9 +16,7 @@ export const getCardTypeLabel = (type) => {
 // Funciones para manejar materias
 export const getSubjects = () => {
     const subjects = localStorage.getItem(SUBJECTS_KEY);
-    const parsedSubjects = subjects ? JSON.parse(subjects) : [];
-    console.log('Materias cargadas:', parsedSubjects);
-    return parsedSubjects;
+    return subjects ? JSON.parse(subjects) : [];
 };
 
 export const addSubject = (subject) => {
@@ -26,31 +24,28 @@ export const addSubject = (subject) => {
     const newSubject = {
         id: Date.now().toString(),
         name: subject.name,
-        created_at: new Date().toISOString()
+        color: subject.color
     };
     subjects.push(newSubject);
     localStorage.setItem(SUBJECTS_KEY, JSON.stringify(subjects));
-    console.log('Materia agregada:', newSubject);
     return newSubject;
 };
 
 export const updateSubject = (id, updates) => {
     const subjects = getSubjects();
-    const index = subjects.findIndex(s => s.id === id);
-    if (index !== -1) {
-        subjects[index] = { ...subjects[index], ...updates };
+    const subjectIndex = subjects.findIndex(s => s.id === id);
+    if (subjectIndex !== -1) {
+        subjects[subjectIndex] = { ...subjects[subjectIndex], ...updates };
         localStorage.setItem(SUBJECTS_KEY, JSON.stringify(subjects));
-        console.log('Materia actualizada:', subjects[index]);
-        return subjects[index];
+        return subjects[subjectIndex];
     }
     return null;
 };
 
 export const deleteSubject = (id) => {
     const subjects = getSubjects();
-    const filteredSubjects = subjects.filter(s => s.id !== id);
-    localStorage.setItem(SUBJECTS_KEY, JSON.stringify(filteredSubjects));
-    console.log('Materia eliminada:', id);
+    const updatedSubjects = subjects.filter(s => s.id !== id);
+    localStorage.setItem(SUBJECTS_KEY, JSON.stringify(updatedSubjects));
 
     // También eliminamos las tarjetas asociadas
     const cards = getCards();
@@ -62,9 +57,7 @@ export const deleteSubject = (id) => {
 // Funciones para manejar tarjetas
 export const getCards = () => {
     const cards = localStorage.getItem(CARDS_KEY);
-    const parsedCards = cards ? JSON.parse(cards) : [];
-    console.log('Tarjetas cargadas:', parsedCards);
-    return parsedCards;
+    return cards ? JSON.parse(cards) : [];
 };
 
 export const addCard = (card) => {
@@ -73,34 +66,27 @@ export const addCard = (card) => {
         id: Date.now().toString(),
         subject_id: card.subject_id,
         question: card.question,
-        type: card.type || 'single',
-        options: card.options || [],
-        answer: card.answer || '',
-        hint: card.hint || '',
-        solution: card.solution || '',
-        created_at: new Date().toISOString()
+        options: card.options
     };
     cards.push(newCard);
     localStorage.setItem(CARDS_KEY, JSON.stringify(cards));
-    console.log('Tarjeta agregada:', newCard);
     return newCard;
 };
 
 export const updateCard = (id, updates) => {
     const cards = getCards();
-    const index = cards.findIndex(c => c.id === id);
-    if (index !== -1) {
-        cards[index] = { ...cards[index], ...updates };
+    const cardIndex = cards.findIndex(c => c.id === id);
+    if (cardIndex !== -1) {
+        cards[cardIndex] = { ...cards[cardIndex], ...updates };
         localStorage.setItem(CARDS_KEY, JSON.stringify(cards));
-        console.log('Tarjeta actualizada:', cards[index]);
-        return cards[index];
+        return cards[cardIndex];
     }
     return null;
 };
 
 export const deleteCard = (id) => {
     const cards = getCards();
-    const filteredCards = cards.filter(c => c.id !== id);
-    localStorage.setItem(CARDS_KEY, JSON.stringify(filteredCards));
+    const updatedCards = cards.filter(c => c.id !== id);
+    localStorage.setItem(CARDS_KEY, JSON.stringify(updatedCards));
     console.log('Tarjeta eliminada:', id);
 }; 

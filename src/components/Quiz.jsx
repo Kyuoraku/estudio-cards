@@ -26,8 +26,8 @@ const Quiz = () => {
     setShowResult(false)
   }
 
-  const handleAnswer = (answer) => {
-    setSelectedAnswer(answer)
+  const handleAnswer = (option) => {
+    setSelectedAnswer(option)
     setShowResult(true)
   }
 
@@ -69,7 +69,7 @@ const Quiz = () => {
                 variant={selectedAnswer === option ? 'contained' : 'outlined'}
                 color={
                   showResult
-                    ? option === currentCard.answer
+                    ? option.isCorrect
                       ? 'success'
                       : selectedAnswer === option
                         ? 'error'
@@ -79,7 +79,7 @@ const Quiz = () => {
                 onClick={() => !showResult && handleAnswer(option)}
                 disabled={showResult}
               >
-                {option}
+                {option.title}
               </Button>
             ))}
           </Stack>

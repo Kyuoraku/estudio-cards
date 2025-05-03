@@ -3,6 +3,9 @@ import { AppBar, Toolbar, Typography, Button, Stack, IconButton, Dialog, DialogT
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import DeleteIcon from '@mui/icons-material/Delete';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 const Header = ({ onManageSubjects, subjectId }) => {
     const navigate = useNavigate();
@@ -14,6 +17,49 @@ const Header = ({ onManageSubjects, subjectId }) => {
         deleteSubject(subjectId);
         setOpenDeleteDialog(false);
         navigate('/');
+    };
+
+    const handleExport = () => {
+        const data = {
+            subjects: subjects,
+            cards: JSON.parse(localStorage.getItem('estudio-cards-cards') || '[]')
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'estudio-cards-backup.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleImport = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.subjects && data.cards) {
+                        localStorage.setItem('estudio-cards-subjects', JSON.stringify(data.subjects));
+                        localStorage.setItem('estudio-cards-cards', JSON.stringify(data.cards));
+                        window.location.reload();
+                    } else {
+                        alert('El archivo no tiene el formato correcto');
+                    }
+                } catch {
+                    alert('Error al leer el archivo');
+                }
+            };
+            reader.readAsText(file);
+        }
+    };
+
+    const handleStartQuiz = () => {
+        // TODO: Implementar la lógica del quiz
+        console.log('Iniciando quiz para la materia:', selectedSubjectName);
     };
 
     return (
@@ -37,14 +83,24 @@ const Header = ({ onManageSubjects, subjectId }) => {
                         Estudio Cards
                     </Typography>
 
-                    <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+                    <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         {selectedSubjectName && (
-                            <Typography variant="subtitle1" sx={{
-                                display: 'flex',
-                                color: 'text.primary'
-                            }}>
-                                {selectedSubjectName}
-                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <IconButton
+                                    color="primary"
+                                    onClick={handleStartQuiz}
+                                    aria-label="iniciar quiz"
+                                    size="medium"
+                                >
+                                    <PlayArrowIcon />
+                                </IconButton>
+                                <Typography variant="subtitle1" sx={{
+                                    display: 'flex',
+                                    color: 'text.primary'
+                                }}>
+                                    {selectedSubjectName}
+                                </Typography>
+                            </Box>
                         )}
                     </Box>
 
@@ -58,12 +114,34 @@ const Header = ({ onManageSubjects, subjectId }) => {
                                 <DeleteIcon />
                             </IconButton>
                         ) : (
-                            <Button
-                                variant="outlined"
-                                onClick={onManageSubjects}
-                            >
-                                Nueva Materia
-                            </Button>
+                            <Stack direction="row" spacing={2}>
+                                <Button
+                                    variant="outlined"
+                                    onClick={onManageSubjects}
+                                >
+                                    Nueva Materia
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    startIcon={<FileUploadIcon />}
+                                    component="label"
+                                >
+                                    Importar
+                                    <input
+                                        type="file"
+                                        hidden
+                                        accept=".json"
+                                        onChange={handleImport}
+                                    />
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    startIcon={<FileDownloadIcon />}
+                                    onClick={handleExport}
+                                >
+                                    Exportar
+                                </Button>
+                            </Stack>
                         )}
                     </Box>
                 </Toolbar>

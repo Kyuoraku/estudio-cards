@@ -1,6 +1,6 @@
 // src/components/CardList.jsx
-import React from 'react'
-import { Box, Typography, Button, Stack, TextField, Select, MenuItem, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Radio, RadioGroup, FormControlLabel, FormLabel } from '@mui/material'
+import React, { useState } from 'react'
+import { Box, Typography, Button, Stack, TextField, Select, MenuItem, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Radio, RadioGroup, FormControlLabel, FormLabel, Alert } from '@mui/material'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { getCardTypeLabel } from '../lib/localStorage'
@@ -8,6 +8,7 @@ import Modal from './Modal'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
+import CheckIcon from '@mui/icons-material/Check'
 
 const CardList = () => {
   const { id } = useParams()
@@ -15,61 +16,27 @@ const CardList = () => {
   const { getSubjectCards, deleteCard, addCard, updateCard } = useApp()
   const [showAddCardModal, setShowAddCardModal] = React.useState(false)
   const [editingCard, setEditingCard] = React.useState(null)
-  const [newCard, setNewCard] = React.useState({
-    question: '',
-    type: 'single',
-    hint: '',
-    solution: '',
-    subject_id: id,
-    options: [],
-    correctOption: ''
-  })
   const cards = getSubjectCards(id)
 
   console.log('Materia ID:', id)
   console.log('Tarjetas encontradas:', cards)
 
-  const handleAddCard = () => {
-    if (newCard.question.trim()) {
-      const cardData = {
-        ...newCard,
-        subject_id: id,
-        created_at: new Date().toISOString()
-      }
+  const handleCloseModal = () => {
+    setShowAddCardModal(false)
+    setEditingCard(null)
+  }
 
-      console.log('Guardando tarjeta:', cardData)
-
-      if (editingCard) {
-        updateCard(editingCard.id, cardData)
-      } else {
-        addCard(cardData)
-      }
-
-      setShowAddCardModal(false)
-      setEditingCard(null)
-      setNewCard({
-        question: '',
-        type: 'single',
-        hint: '',
-        solution: '',
-        subject_id: id,
-        options: [],
-        correctOption: ''
-      })
+  const handleAddCard = (cardData) => {
+    if (editingCard) {
+      updateCard(editingCard.id, cardData)
+    } else {
+      addCard(cardData)
     }
+    handleCloseModal()
   }
 
   const handleEditCard = (card) => {
     setEditingCard(card)
-    setNewCard({
-      question: card.question,
-      type: card.type,
-      hint: card.hint || '',
-      solution: card.solution || '',
-      subject_id: id,
-      options: card.options || [],
-      correctOption: card.correctOption || ''
-    })
     setShowAddCardModal(true)
   }
 
@@ -80,32 +47,200 @@ const CardList = () => {
   }
 
   const handleAddOption = () => {
-    setNewCard(prev => ({
+    setEditingCard(prev => ({
       ...prev,
-      options: [...prev.options, '']
+      options: [...prev.options, { title: '', isCorrect: false }]
     }))
   }
 
   const handleOptionChange = (index, value) => {
-    setNewCard(prev => ({
+    setEditingCard(prev => ({
       ...prev,
-      options: prev.options.map((opt, i) => i === index ? value : opt)
+      options: prev.options.map((opt, i) => i === index ? { ...opt, title: value } : opt)
     }))
   }
 
   const handleDeleteOption = (index) => {
-    setNewCard(prev => ({
+    setEditingCard(prev => ({
       ...prev,
-      options: prev.options.filter((_, i) => i !== index),
-      correctOption: prev.correctOption === index ? '' : prev.correctOption
+      options: prev.options.filter((_, i) => i !== index)
     }))
   }
 
   const handleCorrectOptionChange = (index) => {
-    setNewCard(prev => ({
+    setEditingCard(prev => ({
       ...prev,
-      correctOption: index
+      options: prev.options.map((opt, i) => ({
+        ...opt,
+        isCorrect: i === index
+      }))
     }))
+  }
+
+  const AddCardForm = ({ onClose, subjectId, editingCard }) => {
+    const [question, setQuestion] = useState(editingCard?.question || '')
+    const [type, setType] = useState(editingCard?.type || 'single')
+    const [options, setOptions] = useState(editingCard?.options || [])
+    const [hasCorrectOption, setHasCorrectOption] = useState(editingCard?.options?.some(opt => opt.isCorrect) || false)
+    const [error, setError] = useState('')
+
+    const handleAddOption = () => {
+      setOptions([...options, { title: '', isCorrect: false }])
+    }
+
+    const handleChangeOption = (index, value) => {
+      const newOptions = [...options]
+      newOptions[index].title = value
+      setOptions(newOptions)
+      setError('')
+    }
+
+    const handleDeleteOption = (index) => {
+      const newOptions = options.filter((_, i) => i !== index)
+      setOptions(newOptions)
+      setHasCorrectOption(newOptions.some(opt => opt.isCorrect))
+      setError('')
+    }
+
+    const handleSetCorrectOption = (index) => {
+      const newOptions = options.map((opt, i) => ({
+        ...opt,
+        isCorrect: i === index
+      }))
+      setOptions(newOptions)
+      setHasCorrectOption(true)
+      setError('')
+    }
+
+    const handleSubmit = (e) => {
+      e.preventDefault()
+      setError('')
+
+      // Validar que la pregunta no esté vacía
+      if (!question.trim()) {
+        setError('La pregunta no puede estar vacía')
+        return
+      }
+
+      // Validar que haya al menos una opción
+      if (options.length === 0) {
+        setError('Debes agregar al menos una opción')
+        return
+      }
+
+      // Validar que todas las opciones tengan texto
+      if (options.some(opt => !opt.title.trim())) {
+        setError('Todas las opciones deben tener texto')
+        return
+      }
+
+      // Validar que haya al menos una opción correcta para preguntas de respuesta única
+      if (type === 'single' && !hasCorrectOption) {
+        setError('Debes seleccionar una opción correcta para preguntas de respuesta única')
+        return
+      }
+
+      // Si todas las validaciones pasan, guardar
+      const cardData = {
+        subject_id: subjectId,
+        question,
+        type,
+        options
+      }
+
+      if (editingCard) {
+        updateCard(editingCard.id, cardData)
+      } else {
+        addCard(cardData)
+      }
+      onClose()
+    }
+
+    return (
+      <form onSubmit={handleSubmit}>
+        <Stack spacing={2}>
+          <TextField
+            label="Pregunta"
+            value={question}
+            onChange={(e) => {
+              setQuestion(e.target.value)
+              setError('')
+            }}
+            required
+            fullWidth
+            error={error && !question.trim()}
+          />
+
+          <FormControl fullWidth>
+            <InputLabel>Tipo de pregunta</InputLabel>
+            <Select
+              value={type}
+              onChange={(e) => {
+                setType(e.target.value)
+                setError('')
+              }}
+              label="Tipo de pregunta"
+            >
+              <MenuItem value="single">Respuesta única</MenuItem>
+              <MenuItem value="multiple">Respuesta múltiple</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Typography variant="subtitle1">Opciones:</Typography>
+          {options.map((option, index) => (
+            <Box key={index} sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                value={option.title}
+                onChange={(e) => handleChangeOption(index, e.target.value)}
+                placeholder={`Opción ${index + 1}`}
+                fullWidth
+                required
+                error={error && !option.title.trim()}
+              />
+              {type === 'single' && (
+                <IconButton
+                  color={option.isCorrect ? 'success' : 'default'}
+                  onClick={() => handleSetCorrectOption(index)}
+                  title={option.isCorrect ? 'Opción correcta' : 'Marcar como correcta'}
+                >
+                  <CheckIcon />
+                </IconButton>
+              )}
+              <IconButton
+                color="error"
+                onClick={() => handleDeleteOption(index)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          ))}
+
+          <Button
+            variant="outlined"
+            onClick={handleAddOption}
+            startIcon={<AddIcon />}
+          >
+            Agregar opción
+          </Button>
+
+          {error && (
+            <Alert severity="error">
+              {error}
+            </Alert>
+          )}
+
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+            <Button onClick={onClose}>Cancelar</Button>
+            <Button
+              type="submit"
+              variant="contained"
+            >
+              {editingCard ? 'Guardar cambios' : 'Guardar'}
+            </Button>
+          </Box>
+        </Stack>
+      </form>
+    )
   }
 
   if (cards.length === 0) {
@@ -123,110 +258,14 @@ const CardList = () => {
         </Button>
         <Modal
           isOpen={showAddCardModal}
-          onClose={() => {
-            setShowAddCardModal(false)
-            setEditingCard(null)
-            setNewCard({
-              question: '',
-              type: 'single',
-              hint: '',
-              solution: '',
-              subject_id: id,
-              options: [],
-              correctOption: ''
-            })
-          }}
-          title={editingCard ? "Editar tarjeta" : "Agregar nueva tarjeta"}
+          onClose={handleCloseModal}
+          title="Agregar nueva tarjeta"
         >
-          <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              label="Pregunta"
-              fullWidth
-              value={newCard.question}
-              onChange={(e) => setNewCard({ ...newCard, question: e.target.value })}
-            />
-            <FormControl fullWidth>
-              <InputLabel>Tipo de pregunta</InputLabel>
-              <Select
-                value={newCard.type}
-                label="Tipo de pregunta"
-                onChange={(e) => setNewCard({ ...newCard, type: e.target.value })}
-              >
-                <MenuItem value="single">Respuesta única</MenuItem>
-                <MenuItem value="multiple">Respuesta múltiple</MenuItem>
-                <MenuItem value="fill">Completar palabras</MenuItem>
-              </Select>
-            </FormControl>
-            {newCard.type === 'single' && (
-              <Box sx={{ mt: 2 }}>
-                <FormLabel component="legend">Opciones de respuesta</FormLabel>
-                <RadioGroup
-                  value={newCard.correctOption}
-                  onChange={(e) => handleCorrectOptionChange(parseInt(e.target.value))}
-                >
-                  {newCard.options.map((option, index) => (
-                    <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <Radio value={index} />
-                      <TextField
-                        fullWidth
-                        value={option}
-                        onChange={(e) => handleOptionChange(index, e.target.value)}
-                        placeholder={`Opción ${index + 1}`}
-                      />
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDeleteOption(index)}
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  ))}
-                </RadioGroup>
-                <Button
-                  variant="outlined"
-                  onClick={handleAddOption}
-                  sx={{ mt: 1 }}
-                >
-                  Agregar opción
-                </Button>
-              </Box>
-            )}
-            <TextField
-              label="Pista (opcional)"
-              fullWidth
-              value={newCard.hint}
-              onChange={(e) => setNewCard({ ...newCard, hint: e.target.value })}
-            />
-            <TextField
-              label="Solución (opcional)"
-              fullWidth
-              multiline
-              rows={2}
-              value={newCard.solution}
-              onChange={(e) => setNewCard({ ...newCard, solution: e.target.value })}
-            />
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
-              <Button onClick={() => {
-                setShowAddCardModal(false)
-                setEditingCard(null)
-                setNewCard({
-                  question: '',
-                  type: 'single',
-                  hint: '',
-                  solution: '',
-                  subject_id: id,
-                  options: [],
-                  correctOption: ''
-                })
-              }}>
-                Cancelar
-              </Button>
-              <Button variant="contained" onClick={handleAddCard}>
-                {editingCard ? 'Guardar cambios' : 'Guardar'}
-              </Button>
-            </Box>
-          </Box>
+          <AddCardForm
+            onClose={handleCloseModal}
+            subjectId={id}
+            editingCard={editingCard}
+          />
         </Modal>
       </Box>
     )
@@ -256,8 +295,7 @@ const CardList = () => {
             <TableRow>
               <TableCell>Pregunta</TableCell>
               <TableCell>Tipo</TableCell>
-              <TableCell>Pista</TableCell>
-              <TableCell>Solución</TableCell>
+              <TableCell>Opciones</TableCell>
               <TableCell align="right">Acciones</TableCell>
             </TableRow>
           </TableHead>
@@ -278,14 +316,13 @@ const CardList = () => {
                   {card.question}
                 </TableCell>
                 <TableCell>{getCardTypeLabel(card.type)}</TableCell>
-                <TableCell>{card.hint || '-'}</TableCell>
-                <TableCell>{card.solution || '-'}</TableCell>
+                <TableCell>{card.options.length}</TableCell>
                 <TableCell align="right">
                   <IconButton
                     aria-label="edit"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditCard(card);
+                      e.stopPropagation()
+                      handleEditCard(card)
                     }}
                     sx={{ mr: 1 }}
                   >
@@ -294,8 +331,8 @@ const CardList = () => {
                   <IconButton
                     aria-label="delete"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteCard(card.id);
+                      e.stopPropagation()
+                      handleDeleteCard(card.id)
                     }}
                     color="error"
                   >
@@ -310,110 +347,14 @@ const CardList = () => {
 
       <Modal
         isOpen={showAddCardModal}
-        onClose={() => {
-          setShowAddCardModal(false)
-          setEditingCard(null)
-          setNewCard({
-            question: '',
-            type: 'single',
-            hint: '',
-            solution: '',
-            subject_id: id,
-            options: [],
-            correctOption: ''
-          })
-        }}
+        onClose={handleCloseModal}
         title={editingCard ? "Editar tarjeta" : "Agregar nueva tarjeta"}
       >
-        <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            label="Pregunta"
-            fullWidth
-            value={newCard.question}
-            onChange={(e) => setNewCard({ ...newCard, question: e.target.value })}
-          />
-          <FormControl fullWidth>
-            <InputLabel>Tipo de pregunta</InputLabel>
-            <Select
-              value={newCard.type}
-              label="Tipo de pregunta"
-              onChange={(e) => setNewCard({ ...newCard, type: e.target.value })}
-            >
-              <MenuItem value="single">Respuesta única</MenuItem>
-              <MenuItem value="multiple">Respuesta múltiple</MenuItem>
-              <MenuItem value="fill">Completar palabras</MenuItem>
-            </Select>
-          </FormControl>
-          {newCard.type === 'single' && (
-            <Box sx={{ mt: 2 }}>
-              <FormLabel component="legend">Opciones de respuesta</FormLabel>
-              <RadioGroup
-                value={newCard.correctOption}
-                onChange={(e) => handleCorrectOptionChange(parseInt(e.target.value))}
-              >
-                {newCard.options.map((option, index) => (
-                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <Radio value={index} />
-                    <TextField
-                      fullWidth
-                      value={option}
-                      onChange={(e) => handleOptionChange(index, e.target.value)}
-                      placeholder={`Opción ${index + 1}`}
-                    />
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteOption(index)}
-                      color="error"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-                ))}
-              </RadioGroup>
-              <Button
-                variant="outlined"
-                onClick={handleAddOption}
-                sx={{ mt: 1 }}
-              >
-                Agregar opción
-              </Button>
-            </Box>
-          )}
-          <TextField
-            label="Pista (opcional)"
-            fullWidth
-            value={newCard.hint}
-            onChange={(e) => setNewCard({ ...newCard, hint: e.target.value })}
-          />
-          <TextField
-            label="Solución (opcional)"
-            fullWidth
-            multiline
-            rows={2}
-            value={newCard.solution}
-            onChange={(e) => setNewCard({ ...newCard, solution: e.target.value })}
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
-            <Button onClick={() => {
-              setShowAddCardModal(false)
-              setEditingCard(null)
-              setNewCard({
-                question: '',
-                type: 'single',
-                hint: '',
-                solution: '',
-                subject_id: id,
-                options: [],
-                correctOption: ''
-              })
-            }}>
-              Cancelar
-            </Button>
-            <Button variant="contained" onClick={handleAddCard}>
-              {editingCard ? 'Guardar cambios' : 'Guardar'}
-            </Button>
-          </Box>
-        </Box>
+        <AddCardForm
+          onClose={handleCloseModal}
+          subjectId={id}
+          editingCard={editingCard}
+        />
       </Modal>
     </Box>
   )

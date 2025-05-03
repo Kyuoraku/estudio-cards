@@ -21,7 +21,6 @@ export const AppProvider = ({ children }) => {
         const loadData = () => {
             const loadedSubjects = getSubjects();
             const loadedCards = getCards();
-            console.log('Cargando datos:', { loadedSubjects, loadedCards });
             setSubjects(loadedSubjects);
             setCards(loadedCards);
             setLoading(false);
@@ -40,11 +39,16 @@ export const AppProvider = ({ children }) => {
     };
 
     const handleDeleteSubject = (id) => {
+        // Primero eliminamos todas las cards asociadas a la materia
+        const subjectCards = cards.filter(c => c.subject_id === id);
+        subjectCards.forEach(card => {
+            deleteCard(card.id);
+        });
+
+        // Luego eliminamos la materia
         deleteSubject(id);
         setSubjects(subjects.filter(s => s.id !== id));
-        // También eliminamos las tarjetas asociadas
-        const subjectCards = cards.filter(c => c.subject_id === id);
-        subjectCards.forEach(card => handleDeleteCard(card.id));
+        setCards(cards.filter(c => c.subject_id !== id));
     };
 
     const handleAddCard = (card) => {
