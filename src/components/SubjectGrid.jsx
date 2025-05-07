@@ -28,7 +28,7 @@ const SubjectGrid = () => {
     return (
         <Grid container spacing={3} sx={{ display: 'flex', flexDirection: 'column' }}>
             {subjects.map((subject, index) => (
-                <Grid item xs={12} sm={6} md={4} key={subject.id} >
+                <Grid item xs={12} sm={6} key={subject.id} >
                     <Box
                         sx={{
                             backgroundColor: index % 2 === 0 ? 'background.paper' : 'action.hover',

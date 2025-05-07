@@ -41,16 +41,16 @@ const AppContent = () => {
     <Container
       maxWidth={false}
       sx={{
-        height: '100vh',
+        maxHeight: '100vh',
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        p: 0
+        p: 0,
       }}
     >
       <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
         <Header
-          onManageSubjects={() => setShowSubjectDialog(true)}
+          onManageSubjects={() => setShowAddSubjectModal(true)}
           onStartQuiz={handleStartQuiz}
           subjectId={getSubjectId()}
         />
