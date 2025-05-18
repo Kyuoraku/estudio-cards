@@ -29,15 +29,6 @@ const CardList = () => {
     setEditingCard(null)
   }
 
-  const handleAddCard = (cardData) => {
-    if (editingCard) {
-      updateCard(editingCard.id, cardData)
-    } else {
-      addCard(cardData)
-    }
-    handleCloseModal()
-  }
-
   const handleEditCard = (card) => {
     setEditingCard(card)
     setShowAddCardModal(true)
@@ -49,116 +40,88 @@ const CardList = () => {
     }
   }
 
-  const handleAddOption = () => {
-    setEditingCard(prev => ({
-      ...prev,
-      options: [...prev.options, { title: '', isCorrect: false }]
-    }))
-  }
-
-  const handleOptionChange = (index, value) => {
-    setEditingCard(prev => ({
-      ...prev,
-      options: prev.options.map((opt, i) => i === index ? { ...opt, title: value } : opt)
-    }))
-  }
-
-  const handleDeleteOption = (index) => {
-    setEditingCard(prev => ({
-      ...prev,
-      options: prev.options.filter((_, i) => i !== index)
-    }))
-  }
-
-  const handleCorrectOptionChange = (index) => {
-    setEditingCard(prev => ({
-      ...prev,
-      options: prev.options.map((opt, i) => ({
-        ...opt,
-        isCorrect: i === index
-      }))
-    }))
-  }
-
   const AddCardForm = ({ onClose, subjectId, editingCard }) => {
     const [question, setQuestion] = useState(editingCard?.question || '')
     const [type, setType] = useState(editingCard?.type || 'single')
     const [options, setOptions] = useState(editingCard?.options || [])
-    const [hasCorrectOption, setHasCorrectOption] = useState(editingCard?.options?.some(opt => opt.isCorrect) || false)
     const [error, setError] = useState('')
-
+  
     const handleAddOption = () => {
       setOptions([...options, { title: '', isCorrect: false }])
     }
-
+  
     const handleChangeOption = (index, value) => {
       const newOptions = [...options]
       newOptions[index].title = value
       setOptions(newOptions)
       setError('')
     }
-
+  
     const handleDeleteOption = (index) => {
       const newOptions = options.filter((_, i) => i !== index)
       setOptions(newOptions)
-      setHasCorrectOption(newOptions.some(opt => opt.isCorrect))
       setError('')
     }
-
+  
     const handleSetCorrectOption = (index) => {
+      // Para respuesta única: solo una puede ser correcta
       const newOptions = options.map((opt, i) => ({
         ...opt,
         isCorrect: i === index
       }))
       setOptions(newOptions)
-      setHasCorrectOption(true)
       setError('')
     }
-
+  
+    const handleToggleCorrectOption = (index) => {
+      // Para respuesta múltiple: se pueden alternar
+      const newOptions = options.map((opt, i) =>
+        i === index ? { ...opt, isCorrect: !opt.isCorrect } : opt
+      )
+      setOptions(newOptions)
+      setError('')
+    }
+  
     const handleSubmit = (e) => {
       e.preventDefault()
       setError('')
-
-      // Validar que la pregunta no esté vacía
+  
       if (!question.trim()) {
         setError('La pregunta no puede estar vacía')
         return
       }
-
-      // Validar que haya al menos una opción
+  
       if (options.length === 0) {
         setError('Debes agregar al menos una opción')
         return
       }
-
-      // Validar que todas las opciones tengan texto
+  
       if (options.some(opt => !opt.title.trim())) {
         setError('Todas las opciones deben tener texto')
         return
       }
-
-      // Validar que haya al menos una opción correcta para preguntas de respuesta única
-      if (type === 'single' && !hasCorrectOption) {
+  
+      if (type === 'single' && !options.some(opt => opt.isCorrect)) {
         setError('Debes seleccionar una opción correcta para preguntas de respuesta única')
         return
       }
-
-      // Si todas las validaciones pasan, guardar
+  
       const cardData = {
         subject_id: subjectId,
         question,
         type,
         options
       }
-
+  
       if (editingCard) {
         updateCard(editingCard.id, cardData)
       } else {
         addCard(cardData)
       }
+  
       onClose()
     }
-
+  
     return (
       <form onSubmit={handleSubmit}>
         <Stack spacing={2}>
@@ -173,7 +136,7 @@ const CardList = () => {
             fullWidth
             error={error && !question.trim()}
           />
-
+  
           <FormControl fullWidth>
             <InputLabel>Tipo de pregunta</InputLabel>
             <Select
@@ -181,6 +144,14 @@ const CardList = () => {
               onChange={(e) => {
                 setType(e.target.value)
                 setError('')
+                // Resetear opciones correctas si se cambia a "single"
+                if (e.target.value === 'single' && options.filter(o => o.isCorrect).length > 1) {
+                  const firstCorrect = options.findIndex(o => o.isCorrect)
+                  setOptions(options.map((opt, i) => ({
+                    ...opt,
+                    isCorrect: i === firstCorrect
+                  })))
+                }
               }}
               label="Tipo de pregunta"
             >
@@ -188,7 +159,7 @@ const CardList = () => {
               <MenuItem value="multiple">Respuesta múltiple</MenuItem>
             </Select>
           </FormControl>
-
+  
           <Typography variant="subtitle1">Opciones:</Typography>
           {options.map((option, index) => (
             <Box key={index} sx={{ display: 'flex', gap: 1 }}>
@@ -200,15 +171,21 @@ const CardList = () => {
                 required
                 error={error && !option.title.trim()}
               />
-              {type === 'single' && (
-                <IconButton
-                  color={option.isCorrect ? 'success' : 'default'}
-                  onClick={() => handleSetCorrectOption(index)}
-                  title={option.isCorrect ? 'Opción correcta' : 'Marcar como correcta'}
-                >
-                  <CheckIcon />
-                </IconButton>
-              )}
+              <IconButton
+                color={option.isCorrect ? 'success' : 'default'}
+                onClick={() =>
+                  type === 'single'
+                    ? handleSetCorrectOption(index)
+                    : handleToggleCorrectOption(index)
+                }
+                title={
+                  option.isCorrect
+                    ? 'Opción marcada como correcta'
+                    : 'Marcar como correcta'
+                }
+              >
+                <CheckIcon />
+              </IconButton>
               <IconButton
                 color="error"
                 onClick={() => handleDeleteOption(index)}
@@ -217,7 +194,7 @@ const CardList = () => {
               </IconButton>
             </Box>
           ))}
-
+  
           <Button
             variant="outlined"
             onClick={handleAddOption}
@@ -225,19 +202,14 @@ const CardList = () => {
           >
             Agregar opción
           </Button>
-
+  
           {error && (
-            <Alert severity="error">
-              {error}
-            </Alert>
+            <Alert severity="error">{error}</Alert>
           )}
-
+  
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
             <Button onClick={onClose}>Cancelar</Button>
-            <Button
-              type="submit"
-              variant="contained"
-            >
+            <Button type="submit" variant="contained">
               {editingCard ? 'Guardar cambios' : 'Guardar'}
             </Button>
           </Box>
@@ -245,6 +217,7 @@ const CardList = () => {
       </form>
     )
   }
+  
 
   if (cards.length === 0) {
     return (

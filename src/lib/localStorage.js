@@ -61,12 +61,11 @@ export const getCards = () => {
 };
 
 export const addCard = (card) => {
+    console.log('Agregando tarjeta:', card);
     const cards = getCards();
     const newCard = {
         id: Date.now().toString(),
-        subject_id: card.subject_id,
-        question: card.question,
-        options: card.options
+        ...card,
     };
     cards.push(newCard);
     localStorage.setItem(CARDS_KEY, JSON.stringify(cards));
