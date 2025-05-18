@@ -1,7 +1,7 @@
 // src/components/CardList.jsx
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import { Box, Typography, Button, Stack, TextField, Select, MenuItem, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Radio, RadioGroup, FormControlLabel, FormLabel, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
+import { Box, Typography, Button, Stack, TextField, Select, MenuItem, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Alert } from '@mui/material'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useApp } from '../hooks/useApp'
 import { getCardTypeLabel } from '../lib/localStorage'
@@ -41,6 +41,11 @@ const CardList = () => {
   }
 
   const AddCardForm = ({ onClose, subjectId, editingCard }) => {
+    AddCardForm.propTypes = {
+      onClose: PropTypes.func.isRequired,
+      subjectId: PropTypes.string.isRequired,
+      editingCard: PropTypes.object
+    }
     const [question, setQuestion] = useState(editingCard?.question || '')
     const [type, setType] = useState(editingCard?.type || 'single')
     const [options, setOptions] = useState(editingCard?.options || [])
@@ -162,7 +167,7 @@ const CardList = () => {
   
           <Typography variant="subtitle1">Opciones:</Typography>
           {options.map((option, index) => (
-            <Box key={index} sx={{ display: 'flex', gap: 1 }}>
+            <Box key={`${option.title}-${index}`} sx={{ display: 'flex', gap: 1 }}>
               <TextField
                 value={option.title}
                 onChange={(e) => handleChangeOption(index, e.target.value)}
@@ -337,15 +342,6 @@ const CardList = () => {
       <QuizModal open={showQuizModal} onClose={() => setShowQuizModal(false)} />
     </>
   )
-}
-
-CardList.propTypes = {
-  id: PropTypes.string.isRequired,
-  navigate: PropTypes.func.isRequired,
-  getSubjectCards: PropTypes.func.isRequired,
-  deleteCard: PropTypes.func.isRequired,
-  addCard: PropTypes.func.isRequired,
-  updateCard: PropTypes.func.isRequired
 }
 
 export default CardList

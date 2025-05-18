@@ -66,9 +66,11 @@ const SubjectCard = ({ subject }) => {
             <Dialog
                 open={openDeleteDialog}
                 onClose={() => setOpenDeleteDialog(false)}
-                PaperProps={{
-                    sx: {
-                        fontFamily: 'Roboto, sans-serif'
+                slotProps={{
+                    paper: {
+                        sx: {
+                            fontFamily: 'Roboto, sans-serif'
+                        }
                     }
                 }}
             >

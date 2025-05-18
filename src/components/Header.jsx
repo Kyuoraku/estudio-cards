@@ -144,6 +144,13 @@ const Header = ({ onManageSubjects, subjectId, onStartQuiz }) => {
             <Dialog
                 open={openDeleteDialog}
                 onClose={() => setOpenDeleteDialog(false)}
+                slotProps={{
+                    paper: {
+                        sx: {
+                            fontFamily: 'Roboto, sans-serif'
+                        }
+                    }
+                }}
             >
                 <DialogTitle>Eliminar materia</DialogTitle>
                 <DialogContent>

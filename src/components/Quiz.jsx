@@ -1,7 +1,6 @@
 // src/components/Quiz.jsx
-import React, { useState, useEffect } from 'react'
-import PropTypes from 'prop-types'
-import { Box, Typography, Button, Stack, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel, Checkbox, FormGroup } from '@mui/material'
+import React, { useState } from 'react'
+import { Box, Typography, Button, Stack } from '@mui/material'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useApp } from '../hooks/useApp'
 
@@ -13,12 +12,6 @@ const Quiz = () => {
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [showResult, setShowResult] = useState(false)
   const cards = getSubjectCards(id)
-
-  React.useEffect(() => {
-    if (cards.length > 0) {
-      pick()
-    }
-  }, [cards])
 
   const pick = () => {
     const randomIndex = Math.floor(Math.random() * cards.length)
@@ -66,7 +59,7 @@ const Quiz = () => {
           <Stack spacing={2} sx={{ mt: 3 }}>
             {currentCard.options.map((option, index) => (
               <Button
-                key={index}
+                key={index + ""}
                 variant={selectedAnswer === option ? 'contained' : 'outlined'}
                 color={
                   showResult
@@ -98,12 +91,6 @@ const Quiz = () => {
       )}
     </Box>
   )
-}
-
-Quiz.propTypes = {
-  id: PropTypes.string.isRequired,
-  navigate: PropTypes.func.isRequired,
-  getSubjectCards: PropTypes.func.isRequired,
 }
 
 export default Quiz

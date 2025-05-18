@@ -1,5 +1,6 @@
 // src/components/QuizModal.jsx
 import React, { useState, useEffect } from 'react'
+import PropTypes from 'prop-types'
 import { Box, Typography, Button, IconButton, Stack, Dialog } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 
@@ -64,15 +65,18 @@ const QuizModal = ({ open, onClose, subjectId }) => {
       open={open}
       onClose={onClose}
       fullScreen
-      PaperProps={{
-        sx: {
-          backgroundColor: 'background.default',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          position: 'relative'
+      slotProps={{
+        paper: {
+            sx: {
+                backgroundColor: 'background.default',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                position: 'relative',
+                fontFamily: 'Roboto, sans-serif'
+              }
         }
-      }}
+    }}
     >
       <IconButton
         onClick={onClose}
@@ -104,7 +108,7 @@ const QuizModal = ({ open, onClose, subjectId }) => {
             const isSel = selectedOptions.includes(idx)
             return (
               <Button
-                key={idx}
+                key={option.id || idx}
                 variant={isSel ? 'contained' : 'outlined'}
                 onClick={() => handleOptionSelect(idx)}
                 disabled={showResult}
@@ -158,6 +162,11 @@ const QuizModal = ({ open, onClose, subjectId }) => {
       </Button>
     </Dialog>
   )
+}
+QuizModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  subjectId: PropTypes.number.isRequired
 }
 
 export default QuizModal
