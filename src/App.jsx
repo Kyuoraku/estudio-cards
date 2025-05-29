@@ -1,6 +1,6 @@
 // src/App.jsx
 import React from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { HashRouter , Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Box, Container } from '@mui/material'
 import Header from './components/Header'
 import SubjectGrid from './components/SubjectGrid'
@@ -81,11 +81,11 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AppProvider>
         <AppContent />
       </AppProvider>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 
