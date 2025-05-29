@@ -1,7 +1,26 @@
 // src/components/CardList.jsx
-import React, { useState } from 'react'
+import React, { useState, useRef, useMemo } from 'react'
 import PropTypes from 'prop-types'
-import { Box, Typography, Button, Stack, TextField, Select, MenuItem, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Alert } from '@mui/material'
+import {
+  Box,
+  Typography,
+  Button,
+  Stack,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Alert
+} from '@mui/material'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useApp } from '../hooks/useApp'
 import { getCardTypeLabel } from '../lib/localStorage'
@@ -16,13 +35,10 @@ const CardList = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { getSubjectCards, deleteCard, addCard, updateCard } = useApp()
-  const [showAddCardModal, setShowAddCardModal] = React.useState(false)
-  const [editingCard, setEditingCard] = React.useState(null)
+  const [showAddCardModal, setShowAddCardModal] = useState(false)
+  const [editingCard, setEditingCard] = useState(null)
   const cards = getSubjectCards(id)
   const [showQuizModal, setShowQuizModal] = useState(false)
-
-  console.log('Materia ID:', id)
-  console.log('Tarjetas encontradas:', cards)
 
   const handleCloseModal = () => {
     setShowAddCardModal(false)
@@ -46,116 +62,132 @@ const CardList = () => {
       subjectId: PropTypes.string.isRequired,
       editingCard: PropTypes.object
     }
+
+    // Ref & memo para generar IDs estables sin dependencias externas
+    const nextOptionId = useRef(0)
+    const initialOptionsMeta = useMemo(
+      () => (editingCard?.options || []).map(opt => ({
+        id: nextOptionId.current++,
+        title: opt.title,
+        isCorrect: opt.isCorrect
+      })),
+      [editingCard]
+    )
+
     const [question, setQuestion] = useState(editingCard?.question || '')
     const [type, setType] = useState(editingCard?.type || 'single')
-    const [options, setOptions] = useState(editingCard?.options || [])
+    const [optionsMeta, setOptionsMeta] = useState(initialOptionsMeta)
     const [error, setError] = useState('')
-  
+    const questionRef = useRef(null)
+    const optionRefs = useRef([])
+
     const handleAddOption = () => {
-      setOptions([...options, { title: '', isCorrect: false }])
+      setOptionsMeta(meta => [
+        ...meta,
+        { id: nextOptionId.current++, title: '', isCorrect: false }
+      ])
     }
-  
-    const handleChangeOption = (index, value) => {
-      const newOptions = [...options]
-      newOptions[index].title = value
-      setOptions(newOptions)
+
+    const handleDeleteOption = (id) => {
+      setOptionsMeta(oldMeta => {
+        const idx = oldMeta.findIndex(m => m.id === id)
+        if (idx > -1) optionRefs.current.splice(idx, 1)
+        return oldMeta.filter(m => m.id !== id)
+      })
       setError('')
     }
-  
-    const handleDeleteOption = (index) => {
-      const newOptions = options.filter((_, i) => i !== index)
-      setOptions(newOptions)
-      setError('')
-    }
-  
-    const handleSetCorrectOption = (index) => {
-      // Para respuesta única: solo una puede ser correcta
-      const newOptions = options.map((opt, i) => ({
-        ...opt,
-        isCorrect: i === index
-      }))
-      setOptions(newOptions)
-      setError('')
-    }
-  
-    const handleToggleCorrectOption = (index) => {
-      // Para respuesta múltiple: se pueden alternar
-      const newOptions = options.map((opt, i) =>
-        i === index ? { ...opt, isCorrect: !opt.isCorrect } : opt
+
+    const handleSetCorrectOption = (id) => {
+      setOptionsMeta(meta =>
+        meta.map(m => ({ ...m, isCorrect: m.id === id }))
       )
-      setOptions(newOptions)
       setError('')
     }
-  
+
+    const handleToggleCorrectOption = (id) => {
+      setOptionsMeta(meta =>
+        meta.map(m =>
+          m.id === id ? { ...m, isCorrect: !m.isCorrect } : m
+        )
+      )
+      setError('')
+    }
+
     const handleSubmit = (e) => {
       e.preventDefault()
       setError('')
-  
-      if (!question.trim()) {
+
+      const qText = questionRef.current?.value.trim() || ''
+      if (!qText) {
         setError('La pregunta no puede estar vacía')
         return
       }
-  
-      if (options.length === 0) {
+
+      const collectedOptions = optionsMeta.map((m, idx) => ({
+        title: optionRefs.current[idx]?.value.trim() || '',
+        isCorrect: m.isCorrect
+      }))
+
+      if (collectedOptions.length === 0) {
         setError('Debes agregar al menos una opción')
         return
       }
-  
-      if (options.some(opt => !opt.title.trim())) {
+      if (collectedOptions.some(opt => !opt.title)) {
         setError('Todas las opciones deben tener texto')
         return
       }
-  
-      if (type === 'single' && !options.some(opt => opt.isCorrect)) {
-        setError('Debes seleccionar una opción correcta para preguntas de respuesta única')
+      if (type === 'single' && !collectedOptions.some(opt => opt.isCorrect)) {
+        setError(
+          'Debes seleccionar una opción correcta para preguntas de respuesta única'
+        )
         return
       }
-  
+
       const cardData = {
         subject_id: subjectId,
-        question,
+        question: qText,
         type,
-        options
+        options: collectedOptions
       }
-  
+
       if (editingCard) {
         updateCard(editingCard.id, cardData)
       } else {
         addCard(cardData)
       }
-  
+
       onClose()
     }
-  
+
     return (
       <form onSubmit={handleSubmit}>
         <Stack spacing={2}>
           <TextField
             label="Pregunta"
-            value={question}
-            onChange={(e) => {
-              setQuestion(e.target.value)
-              setError('')
-            }}
-            required
+            defaultValue={editingCard?.question || ''}
+            inputRef={questionRef}
             fullWidth
-            error={error && !question.trim()}
+            required
+            onChange={() => setError('')}
+            error={Boolean(error && !questionRef.current?.value.trim())}
           />
-  
+
           <FormControl fullWidth>
             <InputLabel>Tipo de pregunta</InputLabel>
             <Select
               value={type}
-              onChange={(e) => {
-                setType(e.target.value)
+              onChange={e => {
+                const newType = e.target.value
+                setType(newType)
                 setError('')
-                // Resetear opciones correctas si se cambia a "single"
-                if (e.target.value === 'single' && options.filter(o => o.isCorrect).length > 1) {
-                  const firstCorrect = options.findIndex(o => o.isCorrect)
-                  setOptions(options.map((opt, i) => ({
-                    ...opt,
-                    isCorrect: i === firstCorrect
-                  })))
+                if (
+                  newType === 'single' &&
+                  optionsMeta.filter(o => o.isCorrect).length > 1
+                ) {
+                  const firstCorrect = optionsMeta.find(m => m.isCorrect)?.id
+                  setOptionsMeta(met =>
+                    met.map(o => ({ ...o, isCorrect: o.id === firstCorrect }))
+                  )
                 }
               }}
               label="Tipo de pregunta"
@@ -164,27 +196,28 @@ const CardList = () => {
               <MenuItem value="multiple">Respuesta múltiple</MenuItem>
             </Select>
           </FormControl>
-  
+
           <Typography variant="subtitle1">Opciones:</Typography>
-          {options.map((option, index) => (
-            <Box key={`${option.title}-${index}`} sx={{ display: 'flex', gap: 1 }}>
+          {optionsMeta.map((meta, idx) => (
+            <Box key={meta.id} sx={{ display: 'flex', gap: 1 }}>
               <TextField
-                value={option.title}
-                onChange={(e) => handleChangeOption(index, e.target.value)}
-                placeholder={`Opción ${index + 1}`}
+                defaultValue={meta.title}
+                inputRef={el => (optionRefs.current[idx] = el)}
+                placeholder={`Opción ${idx + 1}`}
                 fullWidth
                 required
-                error={error && !option.title.trim()}
+                onChange={() => setError('')}
+                error={Boolean(error && !optionRefs.current[idx]?.value.trim())}
               />
               <IconButton
-                color={option.isCorrect ? 'success' : 'default'}
+                color={meta.isCorrect ? 'success' : 'default'}
                 onClick={() =>
                   type === 'single'
-                    ? handleSetCorrectOption(index)
-                    : handleToggleCorrectOption(index)
+                    ? handleSetCorrectOption(meta.id)
+                    : handleToggleCorrectOption(meta.id)
                 }
                 title={
-                  option.isCorrect
+                  meta.isCorrect
                     ? 'Opción marcada como correcta'
                     : 'Marcar como correcta'
                 }
@@ -193,13 +226,13 @@ const CardList = () => {
               </IconButton>
               <IconButton
                 color="error"
-                onClick={() => handleDeleteOption(index)}
+                onClick={() => handleDeleteOption(meta.id)}
               >
                 <DeleteIcon />
               </IconButton>
             </Box>
           ))}
-  
+
           <Button
             variant="outlined"
             onClick={handleAddOption}
@@ -207,11 +240,9 @@ const CardList = () => {
           >
             Agregar opción
           </Button>
-  
-          {error && (
-            <Alert severity="error">{error}</Alert>
-          )}
-  
+
+          {error && <Alert severity="error">{error}</Alert>}
+
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
             <Button onClick={onClose}>Cancelar</Button>
             <Button type="submit" variant="contained">
@@ -222,7 +253,6 @@ const CardList = () => {
       </form>
     )
   }
-  
 
   if (cards.length === 0) {
     return (
@@ -230,11 +260,7 @@ const CardList = () => {
         <Typography variant="body1" color="text.secondary" gutterBottom>
           No hay tarjetas en esta materia.
         </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setShowAddCardModal(true)}
-        >
+        <Button variant="contained" onClick={() => setShowAddCardModal(true)}>
           Agregar tarjeta
         </Button>
         <Modal
@@ -256,12 +282,7 @@ const CardList = () => {
     <>
       <Box sx={{ p: 3 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-          <Button
-            variant="outlined"
-            onClick={() => navigate('/')}
-          >
-            ← Volver
-          </Button>
+          <Button variant="outlined" onClick={() => navigate('/')}>← Volver</Button>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -282,41 +303,31 @@ const CardList = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {cards.map((card) => (
+              {cards.map(card => (
                 <TableRow
                   key={card.id}
+                  onClick={() => handleEditCard(card)}
                   sx={{
                     '&:last-child td, &:last-child th': { border: 0 },
                     cursor: 'pointer',
-                    '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.04)'
-                    }
+                    '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
                   }}
-                  onClick={() => handleEditCard(card)}
                 >
-                  <TableCell component="th" scope="row">
-                    {card.question}
-                  </TableCell>
+                  <TableCell component="th" scope="row">{card.question}</TableCell>
                   <TableCell>{getCardTypeLabel(card.type)}</TableCell>
                   <TableCell>{card.options.length}</TableCell>
                   <TableCell align="right">
                     <IconButton
                       aria-label="edit"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleEditCard(card)
-                      }}
+                      onClick={e => { e.stopPropagation(); handleEditCard(card) }}
                       sx={{ mr: 1 }}
                     >
                       <EditIcon />
                     </IconButton>
                     <IconButton
                       aria-label="delete"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDeleteCard(card.id)
-                      }}
                       color="error"
+                      onClick={e => { e.stopPropagation(); handleDeleteCard(card.id) }}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -330,7 +341,7 @@ const CardList = () => {
         <Modal
           isOpen={showAddCardModal}
           onClose={handleCloseModal}
-          title={editingCard ? "Editar tarjeta" : "Agregar nueva tarjeta"}
+          title={editingCard ? 'Editar tarjeta' : 'Agregar nueva tarjeta'}
         >
           <AddCardForm
             onClose={handleCloseModal}
@@ -339,9 +350,10 @@ const CardList = () => {
           />
         </Modal>
       </Box>
+
       <QuizModal open={showQuizModal} onClose={() => setShowQuizModal(false)} />
     </>
   )
 }
 
-export default CardList
+export default CardList;
