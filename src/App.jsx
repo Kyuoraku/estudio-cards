@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from 'react'
 import { HashRouter , Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Box, Container } from '@mui/material'

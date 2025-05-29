@@ -1,4 +1,3 @@
-// src/components/QuizModal.jsx
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { Box, Typography, Button, IconButton, Stack, Dialog } from '@mui/material'
@@ -10,7 +9,6 @@ const QuizModal = ({ open, onClose, subjectId }) => {
   const [selectedOptions, setSelectedOptions] = useState([])
   const [showResult, setShowResult] = useState(false)
 
-  // Cargo y barajo tarjetas
   useEffect(() => {
     const all = JSON.parse(localStorage.getItem('estudio-cards-cards') || '[]')
     const subjectCards = all.filter(c => c.subject_id === subjectId)
@@ -23,7 +21,6 @@ const QuizModal = ({ open, onClose, subjectId }) => {
   const currentCard = cards[currentIndex]
   if (!currentCard) return null
 
-  // Toggle selección según tipo
   const handleOptionSelect = (idx) => {
     if (showResult) return
     if (currentCard.type === 'single') {
@@ -96,7 +93,6 @@ const QuizModal = ({ open, onClose, subjectId }) => {
         justifyContent: 'space-evenly',
         alignItems: 'center',
         width: '100%',
-        maxWidth: '800px',
         mb: 8
       }}>
         <Typography variant="h4" sx={{ textAlign: 'center', mb: 4 }}>
@@ -114,6 +110,7 @@ const QuizModal = ({ open, onClose, subjectId }) => {
                 disabled={showResult}
                 sx={{
                   justifyContent: 'flex-start',
+                  textAlign: 'left',
                   padding: 2,
                   textTransform: 'none',
                   color: getOptionColor(idx),

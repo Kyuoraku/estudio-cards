@@ -1,4 +1,3 @@
-// src/components/CardList.jsx
 import React, { useState, useRef, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import {
@@ -63,7 +62,6 @@ const CardList = () => {
       editingCard: PropTypes.object
     }
 
-    // Ref & memo para generar IDs estables sin dependencias externas
     const nextOptionId = useRef(0)
     const initialOptionsMeta = useMemo(
       () => (editingCard?.options || []).map(opt => ({

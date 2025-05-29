@@ -1,4 +1,3 @@
-// src/components/Quiz.jsx
 import React, { useState } from 'react'
 import { Box, Typography, Button, Stack } from '@mui/material'
 import { useParams, useNavigate } from 'react-router-dom'

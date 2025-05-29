@@ -1,5 +1,3 @@
-// src/pages/QuizView.jsx
-
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
@@ -7,7 +5,6 @@ import {
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 
-// Función sencilla para barajar
 const shuffleArray = (arr) => {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
@@ -19,27 +16,23 @@ const shuffleArray = (arr) => {
 
 const QuizView = () => {
   const navigate = useNavigate()
-  const { id } = useParams()                  // subjectId
-  const [cards, setCards] = useState([])      // todas las tarjetas barajadas
+  const { id } = useParams()            
+  const [cards, setCards] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const currentCard = cards[currentIndex]
 
-  // Estados de selección y feedback
   const [selectedOptions, setSelectedOptions] = useState([])
   const [answered, setAnswered] = useState(false)
   const [isCorrect, setIsCorrect] = useState(false)
 
-  // Cargo y barajo apenas entra
   useEffect(() => {
     const all = JSON.parse(localStorage.getItem('estudio-cards-cards') || '[]')
     const subjectCards = all.filter(c => c.subject_id === id)
     setCards(shuffleArray(subjectCards))
   }, [id])
 
-  // Cierra el quiz
   const handleClose = () => navigate(`/subject/${id}`)
 
-  // Toggle de selección
   const handleOptionClick = (idx) => {
     if (answered) return
     if (currentCard.type === 'single') {
@@ -53,13 +46,11 @@ const QuizView = () => {
     }
   }
 
-  // Valida la respuesta
   const handleSubmit = () => {
     const correctIdxs = currentCard.options
       .map((o, i) => o.isCorrect ? i : null)
       .filter(i => i !== null)
 
-    // compara conjuntos
     const selectedSorted = [...selectedOptions].sort()
     const correctSorted  = [...correctIdxs].sort()
     const ok = selectedSorted.length === correctSorted.length
@@ -69,7 +60,6 @@ const QuizView = () => {
     setAnswered(true)
   }
 
-  // Pasa a la siguiente tarjeta
   const handleNext = () => {
     if (currentIndex < cards.length - 1) {
       setCurrentIndex(currentIndex + 1)
@@ -106,7 +96,6 @@ const QuizView = () => {
 
       <Stack spacing={2} sx={{ width: '100%', maxWidth: 600 }}>
         {currentCard.options.map((opt, idx) => {
-          // estilos según estado
           const isSelected = selectedOptions.includes(idx)
           const isRight    = opt.isCorrect
           let variant = 'outlined'

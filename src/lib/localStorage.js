@@ -1,9 +1,6 @@
-// src/lib/localStorage.js
-
 const SUBJECTS_KEY = 'estudio-cards-subjects';
 const CARDS_KEY = 'estudio-cards-cards';
 
-// Helper para traducir tipos de respuesta
 export const getCardTypeLabel = (type) => {
     const types = {
         'single': 'Respuesta única',
@@ -13,7 +10,6 @@ export const getCardTypeLabel = (type) => {
     return types[type] || type;
 };
 
-// Funciones para manejar materias
 export const getSubjects = () => {
     const subjects = localStorage.getItem(SUBJECTS_KEY);
     return subjects ? JSON.parse(subjects) : [];
@@ -47,14 +43,12 @@ export const deleteSubject = (id) => {
     const updatedSubjects = subjects.filter(s => s.id !== id);
     localStorage.setItem(SUBJECTS_KEY, JSON.stringify(updatedSubjects));
 
-    // También eliminamos las tarjetas asociadas
     const cards = getCards();
     const filteredCards = cards.filter(c => c.subject_id !== id);
     localStorage.setItem(CARDS_KEY, JSON.stringify(filteredCards));
     console.log('Tarjetas eliminadas para la materia:', id);
 };
 
-// Funciones para manejar tarjetas
 export const getCards = () => {
     const cards = localStorage.getItem(CARDS_KEY);
     return cards ? JSON.parse(cards) : [];
