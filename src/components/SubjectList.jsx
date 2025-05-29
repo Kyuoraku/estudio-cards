@@ -69,3 +69,4 @@ export default function SubjectList({ onSelect, showManageOptions = false }) {
     </div>
   )
 }
+

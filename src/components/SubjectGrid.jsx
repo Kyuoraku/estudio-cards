@@ -26,7 +26,7 @@ const SubjectGrid = () => {
     }
 
     return (
-        <Grid container spacing={3} sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Grid container spacing={3} sx={{ display: 'flex', alignItems: 'stretch' }}>
             {subjects.map((subject, index) => (
                 <Grid item xs={12} sm={6} key={subject.id} >
                     <Box
