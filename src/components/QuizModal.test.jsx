@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import QuizModal from './QuizModal';
-import { seedStorage, sampleSubjects, sampleCards } from '../test/utils';
+import { seedStorage, sampleSubjects, sampleCards, spyOnPropTypeErrors } from '../test/utils';
 
 const renderQuiz = (props = {}) => {
     const onClose = vi.fn();
@@ -15,9 +15,18 @@ const actionButton = () => screen.getByRole('button', { name: /^(Enviar|Siguient
 // Specs: specs/06-quiz.md
 describe('QuizModal', () => {
     beforeEach(() => {
-        // subjectId se declara como number en propTypes pero la app pasa strings (BUG-04).
-        vi.spyOn(console, 'error').mockImplementation(() => {});
         seedStorage({ subjects: sampleSubjects, cards: sampleCards });
+    });
+
+    // Debe ser el primer test que renderiza QuizModal: React muestra cada warning una sola vez.
+    it('[QUIZ-11] acepta subjectId como string o null sin warnings de PropTypes', () => {
+        const propTypeErrors = spyOnPropTypeErrors();
+        const { rerender } = render(<QuizModal open={false} onClose={vi.fn()} subjectId={null} />);
+        rerender(<QuizModal open onClose={vi.fn()} subjectId="1712345678901" />);
+        rerender(<QuizModal open onClose={vi.fn()} subjectId="s1" />);
+
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+        expect(propTypeErrors()).toEqual([]);
     });
 
     it('[QUIZ-02] muestra a pantalla completa la primera tarjeta de la materia con sus opciones', () => {

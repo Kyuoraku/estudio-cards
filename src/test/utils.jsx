@@ -1,3 +1,4 @@
+import { format } from 'node:util';
 import { render } from '@testing-library/react';
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { vi } from 'vitest';
@@ -18,6 +19,17 @@ export const readCards = () => JSON.parse(localStorage.getItem(CARDS_KEY) || '[]
 export const mockSequentialIds = (start = 1000) => {
     let next = start;
     return vi.spyOn(Date, 'now').mockImplementation(() => next++);
+};
+
+// Espía console.error y devuelve una función con los warnings de PropTypes registrados.
+// React deduplica cada warning por módulo, así que conviene usarlo en el primer test
+// del archivo que renderiza el componente.
+export const spyOnPropTypeErrors = () => {
+    const spy = vi.spyOn(console, 'error');
+    return () =>
+        spy.mock.calls
+            .map(args => format(...args))
+            .filter(message => message.includes('Failed prop type'));
 };
 
 export const LocationDisplay = () => {

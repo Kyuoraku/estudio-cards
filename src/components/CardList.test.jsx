@@ -7,6 +7,7 @@ import {
     readCards,
     sampleSubjects,
     sampleCards,
+    spyOnPropTypeErrors,
 } from '../test/utils';
 
 const renderCardList = (subjectId = 's1') =>
@@ -44,6 +45,17 @@ const openNewCardForm = () => fireEvent.click(screen.getByRole('button', { name:
 describe('CardList', () => {
     beforeEach(() => {
         vi.spyOn(console, 'log').mockImplementation(() => {});
+    });
+
+    // Debe ser el primer test del archivo: React muestra cada warning de PropTypes una sola vez.
+    it('[QUIZ-11] no monta un QuizModal propio ni genera warnings de PropTypes', () => {
+        const propTypeErrors = spyOnPropTypeErrors();
+        seedStorage({ subjects: sampleSubjects, cards: sampleCards });
+        renderCardList();
+
+        expect(screen.getByRole('table', { name: 'tabla de tarjetas' })).toBeInTheDocument();
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(propTypeErrors()).toEqual([]);
     });
 
     describe('listado', () => {

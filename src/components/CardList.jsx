@@ -28,7 +28,6 @@ import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import CheckIcon from '@mui/icons-material/Check'
-import QuizModal from './QuizModal'
 
 const CardList = () => {
   const { id } = useParams()
@@ -37,7 +36,6 @@ const CardList = () => {
   const [showAddCardModal, setShowAddCardModal] = useState(false)
   const [editingCard, setEditingCard] = useState(null)
   const cards = getSubjectCards(id)
-  const [showQuizModal, setShowQuizModal] = useState(false)
 
   const handleCloseModal = () => {
     setShowAddCardModal(false)
@@ -277,80 +275,76 @@ const CardList = () => {
   }
 
   return (
-    <>
-      <Box sx={{ p: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-          <Button variant="outlined" onClick={() => navigate('/')}>← Volver</Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setShowAddCardModal(true)}
-          >
-            Nueva tarjeta
-          </Button>
-        </Stack>
-
-        <TableContainer component={Paper} sx={{ mb: 3 }}>
-          <Table sx={{ minWidth: 650 }} aria-label="tabla de tarjetas">
-            <TableHead>
-              <TableRow>
-                <TableCell>Pregunta</TableCell>
-                <TableCell>Tipo</TableCell>
-                <TableCell>Opciones</TableCell>
-                <TableCell align="right">Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {cards.map(card => (
-                <TableRow
-                  key={card.id}
-                  onClick={() => handleEditCard(card)}
-                  sx={{
-                    '&:last-child td, &:last-child th': { border: 0 },
-                    cursor: 'pointer',
-                    '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-                  }}
-                >
-                  <TableCell component="th" scope="row">{card.question}</TableCell>
-                  <TableCell>{getCardTypeLabel(card.type)}</TableCell>
-                  <TableCell>{card.options.length}</TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      aria-label="edit"
-                      onClick={e => { e.stopPropagation(); handleEditCard(card) }}
-                      sx={{ mr: 1 }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      aria-label="delete"
-                      color="error"
-                      onClick={e => { e.stopPropagation(); handleDeleteCard(card.id) }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        <Modal
-          isOpen={showAddCardModal}
-          onClose={handleCloseModal}
-          title={editingCard ? 'Editar tarjeta' : 'Agregar nueva tarjeta'}
+    <Box sx={{ p: 3 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+        <Button variant="outlined" onClick={() => navigate('/')}>← Volver</Button>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setShowAddCardModal(true)}
         >
-          <AddCardForm
-            onClose={handleCloseModal}
-            subjectId={id}
-            editingCard={editingCard}
-          />
-        </Modal>
-      </Box>
+          Nueva tarjeta
+        </Button>
+      </Stack>
 
-      <QuizModal open={showQuizModal} onClose={() => setShowQuizModal(false)} />
-    </>
+      <TableContainer component={Paper} sx={{ mb: 3 }}>
+        <Table sx={{ minWidth: 650 }} aria-label="tabla de tarjetas">
+          <TableHead>
+            <TableRow>
+              <TableCell>Pregunta</TableCell>
+              <TableCell>Tipo</TableCell>
+              <TableCell>Opciones</TableCell>
+              <TableCell align="right">Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {cards.map(card => (
+              <TableRow
+                key={card.id}
+                onClick={() => handleEditCard(card)}
+                sx={{
+                  '&:last-child td, &:last-child th': { border: 0 },
+                  cursor: 'pointer',
+                  '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+                }}
+              >
+                <TableCell component="th" scope="row">{card.question}</TableCell>
+                <TableCell>{getCardTypeLabel(card.type)}</TableCell>
+                <TableCell>{card.options.length}</TableCell>
+                <TableCell align="right">
+                  <IconButton
+                    aria-label="edit"
+                    onClick={e => { e.stopPropagation(); handleEditCard(card) }}
+                    sx={{ mr: 1 }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    aria-label="delete"
+                    color="error"
+                    onClick={e => { e.stopPropagation(); handleDeleteCard(card.id) }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Modal
+        isOpen={showAddCardModal}
+        onClose={handleCloseModal}
+        title={editingCard ? 'Editar tarjeta' : 'Agregar nueva tarjeta'}
+      >
+        <AddCardForm
+          onClose={handleCloseModal}
+          subjectId={id}
+          editingCard={editingCard}
+        />
+      </Modal>
+    </Box>
   )
 }
 

@@ -163,7 +163,7 @@ const QuizModal = ({ open, onClose, subjectId }) => {
 QuizModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  subjectId: PropTypes.number.isRequired
+  subjectId: PropTypes.string
 }
 
 export default QuizModal

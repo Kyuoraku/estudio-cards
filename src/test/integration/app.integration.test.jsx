@@ -8,6 +8,7 @@ import {
     sampleSubjects,
     sampleCards,
     mockSequentialIds,
+    spyOnPropTypeErrors,
 } from '../utils';
 
 // Pruebas de integración: la app completa (HashRouter, AppProvider, Header, rutas y modales)
@@ -54,8 +55,22 @@ const createCardViaUi = async ({ question, options, correct, type }) => {
 describe('Integración: App completa', () => {
     beforeEach(() => {
         vi.spyOn(console, 'log').mockImplementation(() => {});
-        // QuizModal declara subjectId como number (BUG-04); evitamos ruido del warning de PropTypes.
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    // Debe ser el primer test del archivo: React muestra cada warning de PropTypes una sola vez.
+    it('[QUIZ-11] abrir una materia y su quiz no genera warnings de PropTypes', async () => {
+        const propTypeErrors = spyOnPropTypeErrors();
+        seedStorage({
+            subjects: [{ id: '1712345678901', name: 'Química' }],
+            cards: [{ ...sampleCards[0], subject_id: '1712345678901' }],
+        });
+        renderAppAt('#/subject/1712345678901');
+        expect(propTypeErrors()).toEqual([]);
+
+        fireEvent.click(screen.getByLabelText('iniciar quiz'));
+        const dialog = await screen.findByRole('dialog');
+        expect(within(dialog).getByRole('heading', { name: sampleCards[0].question })).toBeInTheDocument();
+        expect(propTypeErrors()).toEqual([]);
     });
 
     describe('navegación y rutas', () => {
