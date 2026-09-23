@@ -176,7 +176,7 @@ describe('QuizModal', () => {
         });
     };
 
-    it('[QUIZ-11] reabrir el quiz tras cerrarlo a mitad empieza desde la primera tarjeta', () => {
+    it('[QUIZ-12] reabrir el quiz tras cerrarlo a mitad empieza desde la primera tarjeta', () => {
         const { rerender, onClose } = renderQuiz();
         goToMultiple();
         fireEvent.click(option('San Martín'));
@@ -186,7 +186,7 @@ describe('QuizModal', () => {
         expectFreshStart();
     });
 
-    it('[QUIZ-11] reabrir el quiz tras terminarlo empieza desde la primera tarjeta', () => {
+    it('[QUIZ-12] reabrir el quiz tras terminarlo empieza desde la primera tarjeta', () => {
         const { rerender, onClose } = renderQuiz();
         goToMultiple();
         fireEvent.click(option('San Martín'));
@@ -199,7 +199,7 @@ describe('QuizModal', () => {
         expectFreshStart();
     });
 
-    it('[QUIZ-11] reabrir el quiz tras enviar una respuesta no muestra el resultado anterior', () => {
+    it('[QUIZ-12] reabrir el quiz tras enviar una respuesta no muestra el resultado anterior', () => {
         const { rerender, onClose } = renderQuiz();
         fireEvent.click(option('1853'));
         fireEvent.click(actionButton());

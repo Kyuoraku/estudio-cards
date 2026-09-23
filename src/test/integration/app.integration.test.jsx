@@ -262,7 +262,7 @@ describe('Integración: App completa', () => {
             expect(currentPath()).toBe('/subject/s1');
         });
 
-        it('[QUIZ-11] reabrir el quiz de la misma materia empieza de nuevo desde la primera tarjeta', async () => {
+        it('[QUIZ-12] reabrir el quiz de la misma materia empieza de nuevo desde la primera tarjeta', async () => {
             seedStorage({ subjects: sampleSubjects, cards: sampleCards });
             renderAppAt('#/subject/s1');
 
