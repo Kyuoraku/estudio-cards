@@ -159,14 +159,54 @@ describe('QuizModal', () => {
         expect(actionButton()).toHaveTextContent('Enviar');
     });
 
-    // BUG-03: al reabrir el quiz de la misma materia se conserva el progreso anterior.
-    it.fails('[BUG-03] reabrir el quiz de la misma materia debería empezar desde la primera tarjeta', () => {
-        const { rerender, onClose } = renderQuiz();
-        goToMultiple();
-
+    const reopen = (rerender, onClose) => {
         rerender(<QuizModal open={false} onClose={onClose} subjectId="s1" />);
         rerender(<QuizModal open onClose={onClose} subjectId="s1" />);
+    };
 
+    const expectFreshStart = () => {
         expect(screen.getByRole('heading', { name: sampleCards[0].question })).toBeInTheDocument();
+        expect(actionButton()).toHaveTextContent('Enviar');
+        expect(actionButton()).toBeDisabled();
+        expect(screen.queryByText('Verdadero')).not.toBeInTheDocument();
+        expect(screen.queryByText('Falso')).not.toBeInTheDocument();
+        ['1810', '1816', '1853'].forEach(t => {
+            expect(option(t)).toBeEnabled();
+            expect(option(t)).toHaveClass('MuiButton-outlined');
+        });
+    };
+
+    it('[QUIZ-11] reabrir el quiz tras cerrarlo a mitad empieza desde la primera tarjeta', () => {
+        const { rerender, onClose } = renderQuiz();
+        goToMultiple();
+        fireEvent.click(option('San Martín'));
+
+        reopen(rerender, onClose);
+
+        expectFreshStart();
+    });
+
+    it('[QUIZ-11] reabrir el quiz tras terminarlo empieza desde la primera tarjeta', () => {
+        const { rerender, onClose } = renderQuiz();
+        goToMultiple();
+        fireEvent.click(option('San Martín'));
+        fireEvent.click(actionButton());
+        fireEvent.click(actionButton());
+        expect(onClose).toHaveBeenCalledTimes(1);
+
+        reopen(rerender, onClose);
+
+        expectFreshStart();
+    });
+
+    it('[QUIZ-11] reabrir el quiz tras enviar una respuesta no muestra el resultado anterior', () => {
+        const { rerender, onClose } = renderQuiz();
+        fireEvent.click(option('1853'));
+        fireEvent.click(actionButton());
+        expect(actionButton()).toHaveTextContent('Siguiente');
+
+        reopen(rerender, onClose);
+
+        expectFreshStart();
     });
 });
