@@ -7,6 +7,8 @@ export default defineConfig({
         globals: true,
         environment: 'jsdom',
         setupFiles: ['./src/test/setup.js'],
+        // Los flujos de integración con MUI pueden tardar varios segundos en runners lentos o cargados.
+        testTimeout: 20000,
         coverage: {
             provider: 'v8',
             reporter: ['text', 'json', 'html'],
