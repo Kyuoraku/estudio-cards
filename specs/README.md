@@ -49,7 +49,7 @@ Los tests corren en CI en cada push y PR (`.github/workflows/test.yml`), y el de
 |---|---|---|
 | STO-01 … STO-09 | `lib/localStorage.test.js` | — |
 | STO-10 | — | ✔ |
-| CTX-01 … CTX-09 | `context/AppContext.test.jsx` | (indirecto en todos los flujos) |
+| CTX-01 … CTX-09 | `context/AppContext.test.jsx` | ✔ (CTX-05; el resto, indirecto en todos los flujos) |
 | NAV-01, NAV-02, NAV-05 | — | ✔ |
 | NAV-03, NAV-04 | `Header.test.jsx` | ✔ |
 | NAV-06 | `Modal.test.jsx` | ✔ (modales de materia/tarjeta) |
@@ -64,4 +64,4 @@ Los tests corren en CI en cada push y PR (`.github/workflows/test.yml`), y el de
 | QUIZ-02 … QUIZ-09 | `QuizModal.test.jsx` | ✔ (QUIZ-02, 04, 07, 08, 09) |
 | QUIZ-10 | `Quiz.test.jsx`, `SubjectCard.test.jsx` | ✔ |
 | IO-01 … IO-04 | `Header.test.jsx` | ✔ (export → import) |
-| BUG-01, 02, 03, 05, 06 | `it.fails` (ver [08](08-defectos-conocidos.md)) | BUG-02 |
+| BUG-01, 02, 03, 06 | `it.fails` (ver [08](08-defectos-conocidos.md)) | BUG-02 |

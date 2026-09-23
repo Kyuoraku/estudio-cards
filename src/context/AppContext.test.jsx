@@ -79,7 +79,7 @@ describe('AppProvider / useApp', () => {
         expect(readSubjects()[1].name).toBe('Biología Celular');
     });
 
-    it('[CTX-05] deleteSubject elimina la materia del estado y sus tarjetas del almacenamiento', () => {
+    it('[CTX-05] deleteSubject elimina la materia y sus tarjetas del estado y del almacenamiento', () => {
         seedStorage({ subjects: sampleSubjects, cards: sampleCards });
         const { result } = renderApp();
 
@@ -90,6 +90,19 @@ describe('AppProvider / useApp', () => {
         expect(result.current.subjects).toEqual([sampleSubjects[1]]);
         expect(readSubjects()).toEqual([sampleSubjects[1]]);
         expect(readCards()).toEqual([sampleCards[2]]);
+    });
+
+    it('[CTX-05] deleteSubject quita del estado las tarjetas de la materia sin tocar las demás', () => {
+        seedStorage({ subjects: sampleSubjects, cards: sampleCards });
+        const { result } = renderApp();
+
+        act(() => {
+            result.current.deleteSubject('s1');
+        });
+
+        expect(result.current.cards).toEqual([sampleCards[2]]);
+        expect(result.current.getSubjectCards('s1')).toEqual([]);
+        expect(result.current.getSubjectCards('s2')).toEqual([sampleCards[2]]);
     });
 
     it('[CTX-06] addCard persiste la tarjeta, la agrega al estado y la devuelve', () => {
@@ -154,17 +167,5 @@ describe('AppProvider / useApp', () => {
         });
 
         expect(result.current.getSubjectCards('s1').map(c => c.question)).toEqual(['Q1', 'Q2']);
-    });
-
-    // BUG-05: el estado `cards` no se purga al borrar una materia (solo localStorage).
-    it.fails('[BUG-05] deleteSubject debería quitar del estado las tarjetas de la materia', () => {
-        seedStorage({ subjects: sampleSubjects, cards: sampleCards });
-        const { result } = renderApp();
-
-        act(() => {
-            result.current.deleteSubject('s1');
-        });
-
-        expect(result.current.cards).toEqual([sampleCards[2]]);
     });
 });

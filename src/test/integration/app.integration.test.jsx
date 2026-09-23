@@ -188,6 +188,34 @@ describe('Integración: App completa', () => {
             expect(readSubjects()).toEqual([sampleSubjects[1]]);
             expect(readCards().map(c => c.id)).toEqual(['c3']);
         });
+        it('[CTX-05] las tarjetas de una materia eliminada no reaparecen en una materia nueva con el mismo id', async () => {
+            seedStorage({
+                subjects: [{ id: '1000', name: 'Historia' }],
+                cards: [{ ...sampleCards[0], subject_id: '1000' }],
+            });
+            renderAppAt('#/subject/1000');
+            expect(screen.getByText(sampleCards[0].question)).toBeInTheDocument();
+
+            fireEvent.click(screen.getByLabelText('eliminar materia'));
+            fireEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
+            await waitFor(() => expect(currentPath()).toBe('/'));
+            await waitForDialogToClose();
+
+            // Forzamos que la materia nueva reciba el mismo id que la eliminada.
+            fireEvent.click(screen.getByRole('button', { name: 'Nueva Materia' }));
+            fireEvent.change(screen.getByLabelText('Nombre de la materia'), { target: { value: 'Geografía' } });
+            const now = vi.spyOn(Date, 'now').mockReturnValue(1000);
+            fireEvent.click(screen.getByRole('button', { name: 'Agregar materia' }));
+            now.mockRestore();
+            await waitForDialogToClose();
+            expect(readSubjects()).toEqual([{ id: '1000', name: 'Geografía' }]);
+
+            fireEvent.click(screen.getByRole('heading', { name: 'Geografía' }));
+            await waitFor(() => expect(currentPath()).toBe('/subject/1000'));
+            expect(screen.getByText('No hay tarjetas en esta materia.')).toBeInTheDocument();
+            expect(screen.queryByText(sampleCards[0].question)).not.toBeInTheDocument();
+            expect(readCards()).toEqual([]);
+        });
     });
 
     describe('flujo de tarjetas', () => {
