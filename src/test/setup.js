@@ -1,17 +1,16 @@
-import '@testing-library/jest-dom';
-import { expect, afterEach } from 'vitest';
+import '@testing-library/jest-dom/vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
-afterEach(() => {
-    cleanup();
+const isBrowserEnv = typeof window !== 'undefined';
+
+beforeEach(() => {
+    if (!isBrowserEnv) return;
+    localStorage.clear();
+    window.location.hash = '';
 });
 
-expect.extend({
-    toBeInTheDocument: (received) => {
-        const pass = received !== null;
-        return {
-            pass,
-            message: () => `expected ${received} to be in the document`,
-        };
-    },
-}); 
+afterEach(() => {
+    if (isBrowserEnv) cleanup();
+    vi.restoreAllMocks();
+});

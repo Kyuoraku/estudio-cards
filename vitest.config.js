@@ -10,6 +10,21 @@ export default defineConfig({
         coverage: {
             provider: 'v8',
             reporter: ['text', 'json', 'html'],
+            include: ['src/**/*.{js,jsx}'],
+            exclude: [
+                'src/**/*.test.{js,jsx}',
+                'src/test/**',
+                'src/main.jsx',
+                // Código muerto, no alcanzable desde la app (ver specs/08-defectos-conocidos.md).
+                'src/components/QuizView.jsx',
+                'src/components/SubjectList.jsx',
+            ],
+            thresholds: {
+                statements: 90,
+                branches: 90,
+                functions: 90,
+                lines: 90,
+            },
         },
     },
-}); 
+});
