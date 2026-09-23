@@ -18,6 +18,14 @@ const QuizModal = ({ open, onClose, subjectId }) => {
     setShowResult(false)
   }, [subjectId])
 
+  useEffect(() => {
+    if (open) {
+      setCurrentIndex(0)
+      setSelectedOptions([])
+      setShowResult(false)
+    }
+  }, [open])
+
   const currentCard = cards[currentIndex]
   if (!currentCard) return null
 

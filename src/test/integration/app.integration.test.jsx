@@ -262,6 +262,27 @@ describe('Integración: App completa', () => {
             expect(currentPath()).toBe('/subject/s1');
         });
 
+        it('[QUIZ-12] reabrir el quiz de la misma materia empieza de nuevo desde la primera tarjeta', async () => {
+            seedStorage({ subjects: sampleSubjects, cards: sampleCards });
+            renderAppAt('#/subject/s1');
+
+            fireEvent.click(screen.getByLabelText('iniciar quiz'));
+            let dialog = await screen.findByRole('dialog');
+            fireEvent.click(within(dialog).getByText('1853'));
+            fireEvent.click(within(dialog).getByRole('button', { name: 'Enviar' }));
+            fireEvent.click(within(dialog).getByRole('button', { name: 'Siguiente' }));
+            expect(within(dialog).getByRole('heading', { name: sampleCards[1].question })).toBeInTheDocument();
+            fireEvent.click(within(dialog).getByTestId('CloseIcon').closest('button'));
+            await waitForDialogToClose();
+
+            fireEvent.click(screen.getByLabelText('iniciar quiz'));
+            dialog = await screen.findByRole('dialog');
+            const q = within(dialog);
+            expect(q.getByRole('heading', { name: sampleCards[0].question })).toBeInTheDocument();
+            expect(q.getByRole('button', { name: 'Enviar' })).toBeDisabled();
+            expect(q.queryByText('Verdadero')).not.toBeInTheDocument();
+        });
+
         it('[QUIZ-09] el quiz puede cerrarse antes de terminar', async () => {
             seedStorage({ subjects: sampleSubjects, cards: sampleCards });
             renderAppAt('#/subject/s2');

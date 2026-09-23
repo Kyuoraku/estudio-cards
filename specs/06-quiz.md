@@ -4,7 +4,7 @@ Hay dos puntos de entrada:
 
 | Entrada | Componente | Estado |
 |---|---|---|
-| Botón ▶ del header dentro de una materia | `QuizModal.jsx` (modal a pantalla completa) | ✅ Funcional (QUIZ-01..09) |
+| Botón ▶ del header dentro de una materia | `QuizModal.jsx` (modal a pantalla completa) | ✅ Funcional (QUIZ-01..09, QUIZ-12) |
 | Botón **Quiz** de la tarjeta de materia → `/quiz/:id` | `Quiz.jsx` (página) | ⚠️ No muestra preguntas (BUG-01) |
 
 **Tests:** `QuizModal.test.jsx`, `Quiz.test.jsx`, `Header.test.jsx`, `SubjectCard.test.jsx`, `src/test/integration/app.integration.test.jsx`
@@ -39,6 +39,9 @@ Es correcta solo si se eligieron **exactamente** todas las opciones correctas (n
 
 ### QUIZ-09 · Salir
 El botón ✕ cierra el quiz en cualquier momento.
+
+### QUIZ-12 · Reabrir empieza de nuevo
+Cada vez que se abre el quiz (también al reabrirlo para la misma materia) empieza desde la **primera tarjeta**, sin opciones seleccionadas y sin resultado visible, sin importar si antes se cerró a mitad, después de enviar una respuesta o al terminar la última tarjeta. Solo se reinicia el progreso: las tarjetas no se vuelven a leer de `localStorage` al reabrir (ver BUG-02).
 
 ## Página de quiz (`/quiz/:id`)
 

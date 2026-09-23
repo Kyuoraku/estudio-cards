@@ -61,7 +61,7 @@ Los tests corren en CI en cada push y PR (`.github/workflows/test.yml`), y el de
 | SUBJ-07 | `Header.test.jsx` | ✔ |
 | CARD-01 … CARD-16 | `CardList.test.jsx` | ✔ (CARD-01, 04, 09, 14, 15, 16) |
 | QUIZ-01 | `Header.test.jsx` | ✔ |
-| QUIZ-02 … QUIZ-09 | `QuizModal.test.jsx` | ✔ (QUIZ-02, 04, 07, 08, 09) |
+| QUIZ-02 … QUIZ-09, QUIZ-12 | `QuizModal.test.jsx` | ✔ (QUIZ-02, 04, 07, 08, 09, 11) |
 | QUIZ-10 | `Quiz.test.jsx`, `SubjectCard.test.jsx` | ✔ |
 | IO-01 … IO-04 | `Header.test.jsx` | ✔ (export → import) |
-| BUG-01, 02, 03, 05, 06 | `it.fails` (ver [08](08-defectos-conocidos.md)) | BUG-02 |
+| BUG-01, 02, 05, 06 | `it.fails` (ver [08](08-defectos-conocidos.md)) | BUG-02 |
