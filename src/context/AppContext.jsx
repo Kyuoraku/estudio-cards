@@ -31,6 +31,7 @@ export const AppProvider = ({ children }) => {
     const handleDeleteSubject = useCallback((id) => {
         deleteSubject(id);
         setSubjects(getSubjects());
+        setCards(prevCards => prevCards.filter(card => card.subject_id !== id));
     }, []);
 
     const handleAddCard = useCallback((card) => {

@@ -34,7 +34,7 @@ Al montarse, `AppProvider` lee materias y tarjetas de `localStorage` y luego ren
 `updateSubject` actualiza la materia en estado y almacenamiento sin tocar las demás. *(No se usa desde la UI actualmente.)*
 
 ### CTX-05 · Eliminar materia
-`deleteSubject` elimina la materia de `subjects` y, en almacenamiento, la materia y sus tarjetas. Ver BUG-05 sobre el estado `cards`.
+`deleteSubject` elimina la materia y sus tarjetas tanto del estado (`subjects` y `cards`) como del almacenamiento. Las tarjetas de las demás materias no cambian, y las de la materia eliminada no quedan en memoria (no reaparecen, por ejemplo, si luego se crea otra materia con el mismo id).
 
 ### CTX-06 · Crear tarjeta
 `addCard` persiste la tarjeta, la agrega al final de `cards` y la devuelve.

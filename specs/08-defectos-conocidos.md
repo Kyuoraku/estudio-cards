@@ -12,7 +12,6 @@ Los defectos marcados con 🧪 tienen un test `it.fails(...)` que describe el co
 | BUG-02 | Media | `QuizModal` lee las tarjetas de `localStorage` solo cuando cambia `subjectId`. Si se abre el quiz de una materia, se cierra, y luego se agregan, editan o borran tarjetas, al reabrirlo se usan los datos viejos. | 🧪 `app.integration.test.jsx` |
 | BUG-03 | Media | Reabrir el quiz de la misma materia conserva el progreso anterior (tarjeta actual, selección y resultado). Si se terminó, reabre mostrando la última tarjeta ya respondida. | 🧪 `QuizModal.test.jsx` |
 | BUG-04 | Baja | `QuizModal.propTypes.subjectId` está declarado como `number` requerido, pero la app pasa strings (o `null` antes de abrirlo) → warnings de PropTypes en la consola. | — |
-| BUG-05 | Baja | `deleteSubject` del contexto borra las tarjetas de la materia en `localStorage` pero no del estado `cards` en memoria (quedan “huérfanas” hasta recargar). Hoy no es visible en la UI. | 🧪 `AppContext.test.jsx` |
 | BUG-06 | Baja | Los ids se generan con `Date.now()`. Dos altas en el mismo milisegundo (p. ej. importaciones o automatizaciones) producen ids duplicados, y editar/borrar una afecta a la otra. | 🧪 `localStorage.test.js` |
 | BUG-07 | Baja | Pulsar ▶ en una materia sin tarjetas no hace nada (`QuizModal` devuelve `null`) y no da ningún aviso. | cubierto como comportamiento actual en QUIZ-02 |
 
