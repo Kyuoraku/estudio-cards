@@ -15,7 +15,7 @@ Hay dos puntos de entrada:
 Dentro de una materia, ▶ (`aria-label="iniciar quiz"`) abre el quiz de esa materia.
 
 ### QUIZ-02 · Tarjetas del quiz
-El quiz lee las tarjetas de la materia desde `localStorage` y las presenta **en orden de creación** (sin mezclar), una por vez: pregunta como encabezado y una opción por botón. Solo incluye tarjetas de esa materia. Si la materia no tiene tarjetas, no se abre nada. Al cambiar de materia se recargan las tarjetas y se reinicia el progreso.
+El quiz lee las tarjetas de la materia desde `localStorage` y las presenta **en orden de creación** (sin mezclar), una por vez: pregunta como encabezado y una opción por botón. Solo incluye tarjetas de esa materia. Si la materia no tiene tarjetas, no se abre nada. Cada vez que se abre, el quiz vuelve a leer las tarjetas actuales de la materia, así que refleja las tarjetas agregadas, editadas o borradas mientras estuvo cerrado. Al cambiar de materia se recargan las tarjetas y se reinicia el progreso.
 
 ### QUIZ-03 · Responder "Respuesta única"
 Elegir una opción la resalta y reemplaza la anterior. **Enviar** está deshabilitado hasta elegir una.

@@ -287,9 +287,7 @@ describe('Integración: App completa', () => {
             await waitForDialogToClose();
         });
 
-        // BUG-02: el modal lee localStorage solo cuando cambia subjectId; si ya se abrió para esa
-        // materia, no ve tarjetas creadas después.
-        it.fails('[BUG-02] una tarjeta creada tras abrir el quiz debería aparecer al reabrirlo', async () => {
+        it('[QUIZ-02] una tarjeta creada tras abrir el quiz aparece al reabrirlo', async () => {
             mockSequentialIds();
             seedStorage({ subjects: sampleSubjects, cards: [sampleCards[2]] });
             renderAppAt('#/subject/s2');

@@ -9,7 +9,6 @@ Los defectos marcados con 🧪 tienen un test `it.fails(...)` que describe el co
 | ID | Severidad | Descripción | Test |
 |---|---|---|---|
 | BUG-01 | Alta | **La página `/quiz/:id` nunca muestra preguntas.** `Quiz.jsx` solo elige una tarjeta al pulsar "Siguiente pregunta", que solo aparece después de responder; al entrar no hay tarjeta elegida, así que solo se ve "← Volver". Es el destino del botón **Quiz** de la grilla. | 🧪 `Quiz.test.jsx` |
-| BUG-02 | Media | `QuizModal` lee las tarjetas de `localStorage` solo cuando cambia `subjectId`. Si se abre el quiz de una materia, se cierra, y luego se agregan, editan o borran tarjetas, al reabrirlo se usan los datos viejos. | 🧪 `app.integration.test.jsx` |
 | BUG-03 | Media | Reabrir el quiz de la misma materia conserva el progreso anterior (tarjeta actual, selección y resultado). Si se terminó, reabre mostrando la última tarjeta ya respondida. | 🧪 `QuizModal.test.jsx` |
 | BUG-04 | Baja | `QuizModal.propTypes.subjectId` está declarado como `number` requerido, pero la app pasa strings (o `null` antes de abrirlo) → warnings de PropTypes en la consola. | — |
 | BUG-05 | Baja | `deleteSubject` del contexto borra las tarjetas de la materia en `localStorage` pero no del estado `cards` en memoria (quedan “huérfanas” hasta recargar). Hoy no es visible en la UI. | 🧪 `AppContext.test.jsx` |
