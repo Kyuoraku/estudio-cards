@@ -287,6 +287,19 @@ describe('Integración: App completa', () => {
             await waitForDialogToClose();
         });
 
+        it('[QUIZ-02] en una materia sin tarjetas ▶ avisa que no hay tarjetas y se puede cerrar', async () => {
+            seedStorage({ subjects: sampleSubjects, cards: [] });
+            renderAppAt('#/subject/s1');
+
+            fireEvent.click(screen.getByLabelText('iniciar quiz'));
+            const dialog = await screen.findByRole('dialog');
+            expect(within(dialog).getByText('No hay tarjetas para hacer el quiz.')).toBeInTheDocument();
+
+            fireEvent.click(within(dialog).getByRole('button', { name: 'Cerrar' }));
+            await waitForDialogToClose();
+            expect(currentPath()).toBe('/subject/s1');
+        });
+
         // BUG-02: el modal lee localStorage solo cuando cambia subjectId; si ya se abrió para esa
         // materia, no ve tarjetas creadas después.
         it.fails('[BUG-02] una tarjeta creada tras abrir el quiz debería aparecer al reabrirlo', async () => {

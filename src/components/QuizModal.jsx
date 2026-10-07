@@ -19,7 +19,20 @@ const QuizModal = ({ open, onClose, subjectId }) => {
   }, [subjectId])
 
   const currentCard = cards[currentIndex]
-  if (!currentCard) return null
+  if (!currentCard) {
+    return (
+      <Dialog open={open} onClose={onClose}>
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Typography sx={{ mb: 2 }}>
+            No hay tarjetas para hacer el quiz.
+          </Typography>
+          <Button variant="contained" onClick={onClose}>
+            Cerrar
+          </Button>
+        </Box>
+      </Dialog>
+    )
+  }
 
   const handleOptionSelect = (idx) => {
     if (showResult) return

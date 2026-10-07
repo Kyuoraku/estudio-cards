@@ -34,9 +34,20 @@ describe('QuizModal', () => {
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
-    it('[QUIZ-02] no renderiza nada si la materia no tiene tarjetas', () => {
-        renderQuiz({ subjectId: 'vacía' });
+    it('[QUIZ-02] si la materia no tiene tarjetas muestra un aviso y "Cerrar" llama a onClose', () => {
+        const { onClose } = renderQuiz({ subjectId: 'vacía' });
+        const dialog = screen.getByRole('dialog');
+        expect(dialog).toHaveTextContent('No hay tarjetas para hacer el quiz.');
+        expect(screen.queryByRole('button', { name: 'Enviar' })).not.toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }));
+        expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('[QUIZ-02] cerrado no renderiza nada aunque la materia no tenga tarjetas', () => {
+        renderQuiz({ subjectId: 'vacía', open: false });
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(screen.queryByText('No hay tarjetas para hacer el quiz.')).not.toBeInTheDocument();
     });
 
     it('[QUIZ-03] respuesta única: "Enviar" se habilita al elegir y elegir otra reemplaza la selección', () => {
