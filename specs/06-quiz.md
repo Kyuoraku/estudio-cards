@@ -4,10 +4,10 @@ Hay dos puntos de entrada:
 
 | Entrada | Componente | Estado |
 |---|---|---|
-| Botón ▶ del header dentro de una materia | `QuizModal.jsx` (modal a pantalla completa) | ✅ Funcional (QUIZ-01..09) |
+| Botón ▶ del header dentro de una materia | `QuizModal.jsx` (modal a pantalla completa) | ✅ Funcional (QUIZ-01..09, QUIZ-11) |
 | Botón **Quiz** de la tarjeta de materia → `/quiz/:id` | `Quiz.jsx` (página) | ⚠️ No muestra preguntas (BUG-01) |
 
-**Tests:** `QuizModal.test.jsx`, `Quiz.test.jsx`, `Header.test.jsx`, `SubjectCard.test.jsx`, `src/test/integration/app.integration.test.jsx`
+**Tests:** `QuizModal.test.jsx`, `Quiz.test.jsx`, `Header.test.jsx`, `SubjectCard.test.jsx`, `CardList.test.jsx`, `src/test/integration/app.integration.test.jsx`
 
 ## Quiz en modal (`QuizModal`)
 
@@ -39,6 +39,11 @@ Es correcta solo si se eligieron **exactamente** todas las opciones correctas (n
 
 ### QUIZ-09 · Salir
 El botón ✕ cierra el quiz en cualquier momento.
+
+### QUIZ-11 · Props del modal
+- `QuizModal` se monta una sola vez, en `App.jsx` (`CardList` no tiene un quiz propio).
+- `subjectId` es el id de la materia como **string** (p. ej. `"1712345678901"`) y es opcional: vale `null` hasta que se abre el quiz por primera vez.
+- Renderizar la app, abrir una materia y abrir su quiz no genera warnings de PropTypes en la consola.
 
 ## Página de quiz (`/quiz/:id`)
 
