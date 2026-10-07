@@ -10,6 +10,16 @@ export const getCardTypeLabel = (type) => {
     return types[type] || type;
 };
 
+// Usa Date.now() como base; si ese id ya existe en la colección, toma el siguiente número libre.
+const generateId = (items) => {
+    const usedIds = new Set(items.map(item => item.id));
+    let id = Date.now();
+    while (usedIds.has(id.toString())) {
+        id++;
+    }
+    return id.toString();
+};
+
 export const getSubjects = () => {
     const subjects = localStorage.getItem(SUBJECTS_KEY);
     return subjects ? JSON.parse(subjects) : [];
@@ -18,7 +28,7 @@ export const getSubjects = () => {
 export const addSubject = (subject) => {
     const subjects = getSubjects();
     const newSubject = {
-        id: Date.now().toString(),
+        id: generateId(subjects),
         name: subject.name,
         color: subject.color
     };
@@ -58,7 +68,7 @@ export const addCard = (card) => {
     console.log('Agregando tarjeta:', card);
     const cards = getCards();
     const newCard = {
-        id: Date.now().toString(),
+        id: generateId(cards),
         ...card,
     };
     cards.push(newCard);

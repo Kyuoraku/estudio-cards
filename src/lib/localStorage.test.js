@@ -49,7 +49,7 @@ describe('lib/localStorage', () => {
             expect(getSubjects()).toEqual(sampleSubjects);
         });
 
-        it('[STO-03] addSubject genera id con Date.now(), persiste y devuelve la materia', () => {
+        it('[STO-03] addSubject genera id con Date.now() si está libre, persiste y devuelve la materia', () => {
             vi.spyOn(Date, 'now').mockReturnValue(123456);
             const created = addSubject({ name: 'Química', color: '#00ff00' });
 
@@ -66,6 +66,37 @@ describe('lib/localStorage', () => {
             expect(stored).toHaveLength(3);
             expect(stored.slice(0, 2)).toEqual(sampleSubjects);
             expect(stored[2]).toEqual({ id: '1', name: 'Física' });
+        });
+
+        it('[STO-03] dos materias creadas en el mismo milisegundo tienen ids distintos', () => {
+            vi.spyOn(Date, 'now').mockReturnValue(1);
+            const a = addSubject({ name: 'A' });
+            const b = addSubject({ name: 'B' });
+
+            expect(a.id).toBe('1');
+            expect(b.id).toBe('2');
+            expect(readSubjects().map(s => s.id)).toEqual(['1', '2']);
+        });
+
+        it('[STO-03] tres o más materias creadas en el mismo milisegundo reciben ids consecutivos únicos', () => {
+            vi.spyOn(Date, 'now').mockReturnValue(1000);
+            const ids = ['A', 'B', 'C', 'D'].map(name => addSubject({ name }).id);
+
+            expect(ids).toEqual(['1000', '1001', '1002', '1003']);
+        });
+
+        it('[STO-03] si el id Date.now() ya existe por una alta previa usa el siguiente libre', () => {
+            seedStorage({ subjects: [{ id: '500', name: 'Vieja' }, { id: '501', name: 'Otra' }] });
+            vi.spyOn(Date, 'now').mockReturnValue(500);
+            const created = addSubject({ name: 'Nueva' });
+
+            expect(created.id).toBe('502');
+            updateSubject(created.id, { name: 'Editada' });
+            deleteSubject('500');
+            expect(readSubjects()).toEqual([
+                { id: '501', name: 'Otra' },
+                { id: '502', name: 'Editada' },
+            ]);
         });
 
         it('[STO-04] updateSubject fusiona los cambios, persiste y devuelve la materia actualizada', () => {
@@ -112,7 +143,7 @@ describe('lib/localStorage', () => {
             expect(getCards()).toEqual(sampleCards);
         });
 
-        it('[STO-07] addCard genera id con Date.now(), conserva todos los campos y persiste', () => {
+        it('[STO-07] addCard genera id con Date.now() si está libre, conserva todos los campos y persiste', () => {
             seedStorage({ cards: [sampleCards[0]] });
             vi.spyOn(Date, 'now').mockReturnValue(999);
             const { id: _ignored, ...cardData } = sampleCards[1];
@@ -122,13 +153,37 @@ describe('lib/localStorage', () => {
             expect(readCards()).toEqual([sampleCards[0], created]);
         });
 
-        // BUG-06: los ids se generan con Date.now(); dos altas en el mismo milisegundo colisionan.
-        it.fails('[BUG-06] dos tarjetas creadas en el mismo milisegundo deberían tener ids distintos', () => {
+        it('[STO-07] dos tarjetas creadas en el mismo milisegundo tienen ids distintos', () => {
             vi.spyOn(Date, 'now').mockReturnValue(1);
             const a = addCard({ subject_id: 's1', question: 'A', type: 'single', options: [] });
             const b = addCard({ subject_id: 's1', question: 'B', type: 'single', options: [] });
 
-            expect(a.id).not.toBe(b.id);
+            expect(a.id).toBe('1');
+            expect(b.id).toBe('2');
+            expect(readCards().map(c => c.id)).toEqual(['1', '2']);
+        });
+
+        it('[STO-07] tres o más tarjetas creadas en el mismo milisegundo reciben ids consecutivos únicos', () => {
+            vi.spyOn(Date, 'now').mockReturnValue(1000);
+            const ids = ['A', 'B', 'C', 'D'].map(question =>
+                addCard({ subject_id: 's1', question, type: 'single', options: [] }).id
+            );
+
+            expect(ids).toEqual(['1000', '1001', '1002', '1003']);
+        });
+
+        it('[STO-07] si el id Date.now() ya existe por una alta previa usa el siguiente libre', () => {
+            seedStorage({ cards: [{ ...sampleCards[0], id: '500' }, { ...sampleCards[1], id: '501' }] });
+            vi.spyOn(Date, 'now').mockReturnValue(500);
+            const created = addCard({ subject_id: 's1', question: 'Nueva', type: 'single', options: [] });
+
+            expect(created.id).toBe('502');
+            updateCard(created.id, { question: 'Editada' });
+            deleteCard('500');
+            expect(readCards().map(c => [c.id, c.question])).toEqual([
+                ['501', sampleCards[1].question],
+                ['502', 'Editada'],
+            ]);
         });
 
         it('[STO-08] updateCard fusiona los cambios, persiste y devuelve la tarjeta actualizada', () => {

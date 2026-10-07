@@ -24,7 +24,7 @@ type Card = {
 }
 ```
 
-Los `id` se generan con `Date.now().toString()` (ver BUG-06).
+Los `id` se generan a partir de `Date.now()` y son **únicos dentro de su colección** (materias o tarjetas): si `Date.now().toString()` ya está en uso, se toma el siguiente número libre (`Date.now() + 1`, `+ 2`, …). Así el formato de los datos sigue siendo un número en string, compatible con los datos y backups existentes.
 
 ## Requisitos
 
@@ -40,7 +40,7 @@ Los `id` se generan con `Date.now().toString()` (ver BUG-06).
 
 ### STO-03 · Crear materia
 `addSubject({ name, color })`:
-- genera `id = Date.now().toString()`;
+- genera `id = Date.now().toString()`, o el siguiente número libre si ese id ya existe entre las materias (varias altas en el mismo milisegundo reciben ids consecutivos distintos);
 - guarda solo `id`, `name` y `color` (descarta cualquier otro campo);
 - agrega la materia **al final** de la lista existente y la persiste;
 - devuelve la materia creada.
@@ -55,7 +55,7 @@ Los `id` se generan con `Date.now().toString()` (ver BUG-06).
 `getCards()` devuelve el array guardado en `estudio-cards-cards`, o `[]` si la clave no existe.
 
 ### STO-07 · Crear tarjeta
-`addCard(card)` genera `id = Date.now().toString()`, conserva todos los campos recibidos, la agrega al final, persiste y devuelve la tarjeta creada.
+`addCard(card)` genera `id = Date.now().toString()`, o el siguiente número libre si ese id ya existe entre las tarjetas (varias altas en el mismo milisegundo reciben ids consecutivos distintos), conserva todos los campos recibidos, la agrega al final, persiste y devuelve la tarjeta creada.
 
 ### STO-08 · Actualizar tarjeta
 `updateCard(id, updates)` fusiona, persiste y devuelve la tarjeta actualizada; `null` y sin escritura si no existe.
