@@ -10,13 +10,18 @@ const QuizModal = ({ open, onClose, subjectId }) => {
   const [showResult, setShowResult] = useState(false)
 
   useEffect(() => {
-    const all = JSON.parse(localStorage.getItem('estudio-cards-cards') || '[]')
-    const subjectCards = all.filter(c => c.subject_id === subjectId)
-    setCards(subjectCards)
     setCurrentIndex(0)
     setSelectedOptions([])
     setShowResult(false)
   }, [subjectId])
+
+  // Recarga las tarjetas cada vez que se abre, para ver altas, ediciones y bajas recientes.
+  useEffect(() => {
+    if (!open) return
+    const all = JSON.parse(localStorage.getItem('estudio-cards-cards') || '[]')
+    const subjectCards = all.filter(c => c.subject_id === subjectId)
+    setCards(subjectCards)
+  }, [open, subjectId])
 
   const currentCard = cards[currentIndex]
   if (!currentCard) return null

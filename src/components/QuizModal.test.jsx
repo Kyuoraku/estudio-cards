@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import QuizModal from './QuizModal';
-import { seedStorage, sampleSubjects, sampleCards } from '../test/utils';
+import { seedStorage, readCards, sampleSubjects, sampleCards } from '../test/utils';
 
 const renderQuiz = (props = {}) => {
     const onClose = vi.fn();
@@ -157,6 +157,39 @@ describe('QuizModal', () => {
 
         expect(screen.getByRole('heading', { name: sampleCards[2].question })).toBeInTheDocument();
         expect(actionButton()).toHaveTextContent('Enviar');
+    });
+
+    const reopenAfter = (change, subjectId = 's1') => {
+        const { rerender, onClose } = renderQuiz({ subjectId });
+        rerender(<QuizModal open={false} onClose={onClose} subjectId={subjectId} />);
+        change(readCards());
+        rerender(<QuizModal open onClose={onClose} subjectId={subjectId} />);
+    };
+
+    it('[QUIZ-02] al reabrirse recarga las tarjetas: muestra una tarjeta editada con el modal cerrado', () => {
+        reopenAfter(cards =>
+            seedStorage({ cards: cards.map(c => (c.id === 'c1' ? { ...c, question: 'Pregunta editada' } : c)) })
+        );
+        expect(screen.getByRole('heading', { name: 'Pregunta editada' })).toBeInTheDocument();
+        expect(screen.queryByText(sampleCards[0].question)).not.toBeInTheDocument();
+    });
+
+    it('[QUIZ-02] al reabrirse recarga las tarjetas: no muestra una tarjeta borrada con el modal cerrado', () => {
+        reopenAfter(cards => seedStorage({ cards: cards.filter(c => c.id !== 'c1') }));
+        expect(screen.getByRole('heading', { name: sampleCards[1].question })).toBeInTheDocument();
+        expect(screen.queryByText(sampleCards[0].question)).not.toBeInTheDocument();
+    });
+
+    it('[QUIZ-02] al reabrirse recarga las tarjetas: incluye una tarjeta agregada con el modal cerrado', () => {
+        const nueva = {
+            id: 'c9',
+            subject_id: 'vacía',
+            question: 'Pregunta nueva',
+            type: 'single',
+            options: [{ title: 'Sí', isCorrect: true }, { title: 'No', isCorrect: false }],
+        };
+        reopenAfter(cards => seedStorage({ cards: [...cards, nueva] }), 'vacía');
+        expect(screen.getByRole('heading', { name: 'Pregunta nueva' })).toBeInTheDocument();
     });
 
     // BUG-03: al reabrir el quiz de la misma materia se conserva el progreso anterior.
