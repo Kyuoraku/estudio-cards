@@ -26,7 +26,7 @@ A web app for creating and studying flashcards. Supports **single-answer** and *
   - Validates answers in real time.
   - Allows user to retry, proceed, or exit.
 - 💾 **Import/export support** via `.json` files.
-- 🧪 **Unit tests** for key components.
+- 🧪 **Unit and integration tests** for every feature, traced to the specs in [`specs/`](specs/README.md).
 
 ---
 
@@ -58,8 +58,11 @@ npm install
 npm run dev
 
 # Run tests
-npm run test
+npm run test:run       # single run
+npm run test:coverage  # with coverage thresholds
 ```
+
+Functional specifications live in [`specs/`](specs/README.md); every test name starts with the requirement ID it verifies (e.g. `[CARD-11]`).
 
 ---
 
