@@ -113,7 +113,7 @@ describe('Integración: App completa', () => {
             await waitFor(() => expect(currentPath()).toBe('/'));
         });
 
-        it('[QUIZ-10] el botón "Quiz" de una materia abre /quiz/:id', async () => {
+        it('[QUIZ-10] el botón "Quiz" de una materia abre /quiz/:id con una pregunta para responder', async () => {
             seedStorage({ subjects: sampleSubjects, cards: sampleCards });
             renderAppAt('#/');
 
@@ -122,6 +122,12 @@ describe('Integración: App completa', () => {
 
             await waitFor(() => expect(currentPath()).toBe('/quiz/s2'));
             expect(screen.getByRole('button', { name: '← Volver' })).toBeInTheDocument();
+            expect(screen.getByRole('heading', { name: '¿Cuál es la unidad básica de la vida?' })).toBeInTheDocument();
+
+            fireEvent.click(screen.getByRole('button', { name: 'La célula' }));
+            expect(screen.getByRole('button', { name: 'La célula' })).toBeDisabled();
+            fireEvent.click(screen.getByRole('button', { name: 'Siguiente pregunta' }));
+            expect(screen.getByRole('button', { name: 'La célula' })).toBeEnabled();
         });
     });
 

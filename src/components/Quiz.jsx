@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Box, Typography, Button, Stack } from '@mui/material'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useApp } from '../hooks/useApp'
@@ -11,6 +11,7 @@ const Quiz = () => {
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [showResult, setShowResult] = useState(false)
   const cards = getSubjectCards(id)
+  const hasCards = cards.length > 0
 
   const pick = () => {
     const randomIndex = Math.floor(Math.random() * cards.length)
@@ -18,6 +19,10 @@ const Quiz = () => {
     setSelectedAnswer(null)
     setShowResult(false)
   }
+
+  useEffect(() => {
+    if (hasCards) pick()
+  }, [id, hasCards])
 
   const handleAnswer = (option) => {
     setSelectedAnswer(option)

@@ -5,7 +5,7 @@ Hay dos puntos de entrada:
 | Entrada | Componente | Estado |
 |---|---|---|
 | Botón ▶ del header dentro de una materia | `QuizModal.jsx` (modal a pantalla completa) | ✅ Funcional (QUIZ-01..09) |
-| Botón **Quiz** de la tarjeta de materia → `/quiz/:id` | `Quiz.jsx` (página) | ⚠️ No muestra preguntas (BUG-01) |
+| Botón **Quiz** de la tarjeta de materia → `/quiz/:id` | `Quiz.jsx` (página) | ✅ Funcional (QUIZ-10) |
 
 **Tests:** `QuizModal.test.jsx`, `Quiz.test.jsx`, `Header.test.jsx`, `SubjectCard.test.jsx`, `src/test/integration/app.integration.test.jsx`
 
@@ -45,4 +45,6 @@ El botón ✕ cierra el quiz en cualquier momento.
 ### QUIZ-10 · Página de quiz
 - El botón **Quiz** de una materia en la grilla navega a `/quiz/:id` (sin abrir la materia).
 - Sin tarjetas: "No hay tarjetas para hacer el quiz." y **← Volver** → `/subject/:id`.
-- Con tarjetas: muestra **← Volver** → `/subject/:id`. *(Debería mostrar preguntas; ver BUG-01.)*
+- Con tarjetas: muestra **← Volver** → `/subject/:id` y, al entrar, una tarjeta de la materia **elegida al azar**: la pregunta como encabezado y una opción por botón. Si la materia pasa de no tener tarjetas a tenerlas, o se cambia de materia sin salir de la página, se elige una tarjeta nueva.
+- Elegir una opción responde de inmediato (sin botón Enviar): la opción correcta se pinta en verde; si la elegida es incorrecta, se pinta en rojo. Todas las opciones quedan deshabilitadas.
+- Tras responder aparece **Siguiente pregunta**, que elige otra tarjeta al azar (puede repetirse) con la respuesta reiniciada. El quiz no termina: se sale con **← Volver**.
